@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@discordjs/opus": "^0.5.3",
+    "@discordjs/voice": "^0.10.0",
+    "@types/yt-search": "^2.3.2",
+    "discord.js": "^13.8.1",
+    "dotenv": "^16.0.1",
+    "ffmpeg-static": "^4.4.1",
+    "isomorphic-unfetch": "^3.1.0",
+    "play-dl": "^1.9.5",
+    "sodium": "^3.0.2",
+    "spotify-url-info": "^3.1.2",
+    "yt-search": "^2.10.3",
+    "ytdl-core": "^4.11.0",
+    "ytpl": "^2.3.0"
+  }
+}
