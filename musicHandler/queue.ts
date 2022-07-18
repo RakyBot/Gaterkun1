@@ -1,4 +1,4 @@
-import { AudioPlayer, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection } from "@discordjs/voice";
+import { AudioPlayer, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection, AudioPlayerStatus } from "@discordjs/voice";
 import { Client, Snowflake } from "discord.js";
 import play from 'play-dl'
 import mapMutator from "./mapMutator";
@@ -21,7 +21,7 @@ export type QueueEntry = {
     settings: {
         trackLoop: boolean,
         queueLoop: boolean,
-    }
+    },
 }
 
 
@@ -69,11 +69,30 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
 
         return true;
     }
+    async initGuild(guildId: Snowflake) {
+        this.queueMap.set(guildId, {
+            guildId: guildId,
+            client: this.client,
+            queue: [],
+            currentTrack: 0,
+            player: createAudioPlayer({
+                behaviors: {
+                    noSubscriber: NoSubscriberBehavior.Pause, // Pause if there is no active connection
+                }
+            }),
+            settings: {
+                trackLoop: false,
+                queueLoop: false,
+            }
+        })
 
-    async add(guildId: Snowflake, query: string): Promise<number | boolean> {
+        return true;
+    }
+
+    async add(guildId: Snowflake, query: string): Promise<false | string> {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
-            if (stateManager.can.add(guildQueue)) { // *preferably test the systems after this is done before continuing*
+            if (await stateManager.can.add(guildQueue)) {
 
                 const entries = await queryFilter.getEntry(query) // Filter the queries and return links (queryFilter.ts)
                     if (!entries) return false;
@@ -86,48 +105,190 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 }
 
                 if (guildQueue.player.state.status == 'idle') {
-                    console.log('helping')
-
-                    await this.goto(guildId, 0) // if the bot is just starting give it a bit of a push
-
+                    await this.goto(guildId, guildQueue.currentTrack) // If the bot is just starting or had no next track, it needs a trigger to start.
                 }
                 
-                return count;
+                if (count > 1) {
+                    return `Queued ${count} tracks.`;
+                } else {
+                    return `Queued ${entries[0].title} by ${"`"}${entries[0].author}${"`"}.`
+                }
+                
 
             }
         }
     }
 
-    remove() {
+    async remove(guildId: Snowflake, index: number): Promise<boolean> { // Expects a 0-based index
+        const guildQueue = this.queueMap.get(guildId)
+        if (guildQueue) {
+            if (await stateManager.can.remove(guildQueue)) {
+
+                if (index >= 0) {
+                    mapMutator.deleteTrack(this.queueMap, guildId, index); // Delete the track
+
+                    if (guildQueue.currentTrack == index) { // Current track is being removed
+
+                        if (guildQueue.queue[guildQueue.currentTrack]) { // if a next track exists, go to it
+
+                            await this.goto(guildId, guildQueue.currentTrack);
+                        
+                        } else { // if this is the last track, enter the bot into idle state
+
+                            guildQueue.player.stop();
+
+                        }
+                    
+                    } else if (guildQueue.currentTrack > index) { // Current Track is after the removed track
+
+                        await this.goto(guildId, guildQueue.currentTrack - 1);
+
+                    }
+
+                }
+
+                return true;
+            }
+        }
+
+        return false;
 
     }
 
-    move() {
+    async move(guildId: Snowflake, oldIndex: number, newIndex: number): Promise<boolean> {
+
+        const guildQueue = this.queueMap.get(guildId)
+        if (guildQueue) {
+            if (await stateManager.can.move(guildQueue)) {
+
+                if (guildQueue.queue[oldIndex]) { // valid track
+
+                    if (newIndex <= (guildQueue.queue.length - 1)) { // prevent blank space from existing in the queue
+
+                        if (guildQueue.currentTrack == oldIndex) { // Reference where the current track is going
+
+                            mapMutator.changeCurrentTrack(this.queueMap, guildId, newIndex);
+
+                        }
+
+                        mapMutator.moveTrack(this.queueMap, guildId, oldIndex, newIndex);
+
+                        return true;
+
+                    }
+
+                }
+
+            }
+        }
+
+        return false;
 
     }
 
-    resume() {
+    async resume(guildId: Snowflake) {
+        const guildQueue = this.queueMap.get(guildId)
+        if (guildQueue) {
+
+            if (await stateManager.can.resume(guildQueue)) {
+
+                guildQueue.player.unpause();
+                return true;
+
+            }
+
+        }
+
+        return false;
 
     }
     
-    pause() {
+    async pause(guildId: Snowflake) {
+        const guildQueue = this.queueMap.get(guildId)
+        if (guildQueue) {
 
+            if (await stateManager.can.pause(guildQueue)) {
+
+                guildQueue.player.pause();
+                return true;
+
+            }
+
+        }
+
+        return false;
     }
 
-    clear(guildId: Snowflake) {
-        // Reset the queue settings and the queue itself.
+    clear(guildId: Snowflake, settings?: boolean) { // Are we clearing the settings for the guild too?
+        const guildQueue = this.queueMap.get(guildId)
+            if (!guildQueue) return false;
+        
+        if (settings) {
+
+            this.queueMap.set(guildId, {
+                guildId: guildId,
+                client: this.client,
+                queue: [],
+                currentTrack: 0,
+                player: guildQueue.player,
+                settings: {
+                    trackLoop: false,
+                    queueLoop: false,
+                },
+            })
+
+        } else {
+
+            this.queueMap.set(guildId, {
+                guildId: guildId,
+                client: this.client,
+                queue: [],
+                currentTrack: 0,
+                player: guildQueue.player,
+                settings: {
+                    trackLoop: guildQueue.settings.trackLoop,
+                    queueLoop: guildQueue.settings.queueLoop,
+                },
+            })
+
+        }
+        
+        return true;
+    }
+
+    async printQueue(guildId: Snowflake) {
+        const guildQueue = this.queueMap.get(guildId)
+        if (guildQueue) {
+            console.log(guildQueue.queue)
+            console.log("Current Track Index: ", guildQueue.currentTrack)
+            let titles = []
+            for (const track of guildQueue.queue) {
+
+                titles.push(track.title)
+
+            }
+            return titles.join()
+        }
     }
 
     async goto(guildId: Snowflake, index: number): Promise<boolean> {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
-            if (stateManager.can.play(guildQueue)) {
+            if (await stateManager.can.play(guildQueue)) {
 
                 const queue = guildQueue.queue
                 if (queue[index]) {
 
-                    return await this.loadTrack(guildId, index);
+                    const trackLoad = await this.loadTrack(guildId, index);
+                    if (trackLoad) {
+                        mapMutator.changeCurrentTrack(this.queueMap, guildId, index);
+                    }
+                    return trackLoad
                     
+                } else {
+
+                    return false;
+
                 }
 
             }
@@ -137,9 +298,9 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
     async loadTrack(guildId: Snowflake, position: number): Promise<boolean> {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
-            if (stateManager.can.add(guildQueue)) { // *preferably test the systems after this is done before continuing*
-                console.log('resource being added')
-
+            if (stateManager.can.add(guildQueue)) {
+                
+                console.log('LOADTRACK: Loading the resource')
                 const resource = await createResource(guildQueue.queue[position]) // Load the resource
                 guildQueue.player.play(resource) // Play the resource being loaded
 
@@ -148,11 +309,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                     connection.subscribe(guildQueue.player)
                 }
 
-                console.log('voice connection status: ', getVoiceConnection(guildId).state.status)
-
                 mapMutator.changeCurrentTrack(this.queueMap, guildId, position) // Mutate the map (currentTrack)
-
-                console.log('player status: ', guildQueue.player.state.status)
 
                 return true;
 

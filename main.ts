@@ -26,8 +26,15 @@ client.on('ready', async () => {
         }
     })
 
-    client.on('guildCreate', (guild) => {
-        // Initialize that new server into the bot's queue. (TO DO)
+    client.on('guildCreate', async (guild) => {
+
+        const queue = new Queue(client, queueMap)
+
+        await queue.initGuild(guild.id)
+        await loadManager.addGuild(client, queue, guild.id)
+
+        return;
+        
     })
 
 })

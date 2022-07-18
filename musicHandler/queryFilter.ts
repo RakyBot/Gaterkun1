@@ -25,11 +25,9 @@ export default {
 
         // Insert Regexs here to decide if it's a link or search request
         if (query.match(discordCDN)) { // Discord
-
             return false; /////////////////////////////// To-Do ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         } else if (query.match(spotifyLink)) { // Spotify
-
             const tracks = await getTracks(query)
                 if (tracks.length > 1) { // It's a playlist
 
@@ -79,7 +77,6 @@ export default {
                 }
 
         } else if (playlistID) { // YouTube Playlist
-
             const playlist = await ytpl(playlistID).catch((err) => { throw err })
             const tracks = playlist.items
 
@@ -98,7 +95,6 @@ export default {
             return links;
 
         } else if (ytdl.validateURL(query)) { // YouTube Direct Link
-
             const track = await ytdl.getBasicInfo(query).catch((err) => { throw err })
             return [
                 {
@@ -110,7 +106,6 @@ export default {
             ]
 
         } else { // Search Query
-
             const trackFinder = async (query) => {  
                 const trackResult = await ytSearch(query).catch((err) => { throw err })
                 return (trackResult.videos.length > 1) ? trackResult.videos[0] : null;

@@ -4,7 +4,7 @@ import { joinVoiceChannel } from "@discordjs/voice";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
 
-export default class Play extends RFCommand {
+export default class PlayCommand extends RFCommand {
     constructor(client: Client) {
         super(client)
     }
@@ -40,7 +40,7 @@ export default class Play extends RFCommand {
             
             const result = await new Queue(interaction.client, queueMap).add(guild.id, query)
 
-            return interaction.editReply(`Queued ${result} track(s).`)
+            return interaction.editReply(result ? result : "Could not queue the requested track(s).")
 
         })
     }

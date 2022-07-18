@@ -3,7 +3,7 @@ import { Client, CommandInteraction, GuildMember, VoiceChannel } from "discord.j
 import { config } from "../../modules/config";
 import { joinVoiceChannel } from "@discordjs/voice";
 
-export default class Join extends RFCommand {
+export default class JoinCommand extends RFCommand {
     constructor(client: Client) {
         super(client)
     }

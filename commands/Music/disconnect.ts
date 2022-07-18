@@ -3,7 +3,7 @@ import { Client, CommandInteraction, GuildMember } from "discord.js";
 import { config } from "../../modules/config";
 import { getVoiceConnection } from "@discordjs/voice";
 
-export default class Disconnect extends RFCommand {
+export default class DisconnectCommand extends RFCommand {
     constructor(client: Client) {
         super(client)
     }

@@ -17,7 +17,7 @@ export default class CommandHandler {
             for (const commandClass of commands) {
                 const slashInfo = new commandClass(this.client).slashInfo
                 slashCommandsSetData.push(slashInfo)
-                console.log(slashInfo)
+                //console.log(slashInfo)
             }
 
             // Send Commands to Discord
