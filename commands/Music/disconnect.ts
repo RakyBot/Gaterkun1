@@ -2,6 +2,7 @@ import RFCommand from "../commandClass";
 import { Client, CommandInteraction, GuildMember } from "discord.js";
 import { config } from "../../modules/config";
 import { getVoiceConnection } from "@discordjs/voice";
+import { basicEmbed, colorPalette } from "../../modules/responses";
 
 export default class DisconnectCommand extends RFCommand {
     constructor(client: Client) {
@@ -32,8 +33,9 @@ export default class DisconnectCommand extends RFCommand {
                 return res(interaction.editReply("Please join my voice channel to use this feature!"))
 
             }
-             
-            return res(interaction.editReply(`Disconnected from <#${voiceChannel.id}>.`))
+            
+            return interaction.editReply({ embeds: [ basicEmbed( `🚪｜Disconnected.`, colorPalette.trackOperation ) ] })
+
 
         })
     }

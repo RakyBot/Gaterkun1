@@ -1,4 +1,5 @@
 import { Client, CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionTypes } from "discord.js/typings/enums";
 import { queueMapType } from "../musicHandler/queue";
 
 type slashInfoType = {
@@ -7,8 +8,8 @@ type slashInfoType = {
     options?: {
         name: string,
         description: string,
-        type: string,
-        required: boolean
+        type: string | ApplicationCommandOptionTypes,
+        required?: boolean
     }[]
 }
 

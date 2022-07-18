@@ -3,6 +3,7 @@ import { Client, CommandInteraction, GuildMember } from "discord.js";
 import { joinVoiceChannel } from "@discordjs/voice";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
+import { basicEmbed, colorPalette } from "../../modules/responses";
 
 export default class PlayCommand extends RFCommand {
     constructor(client: Client) {
@@ -11,7 +12,7 @@ export default class PlayCommand extends RFCommand {
 
     slashInfo = {
         name: 'play',
-        description: "Test Command",
+        description: "Play a track.",
         options: [
             {
                 name: "query",
@@ -40,7 +41,12 @@ export default class PlayCommand extends RFCommand {
             
             const result = await new Queue(interaction.client, queueMap).add(guild.id, query)
 
-            return interaction.editReply(result ? result : "Could not queue the requested track(s).")
+            if (result) {
+                return interaction.editReply({ embeds: [ basicEmbed( result, colorPalette.trackOperation ) ] })
+            } else {
+                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜Error queueing track(s).`, colorPalette.error ) ] })
+            }
+            
 
         })
     }

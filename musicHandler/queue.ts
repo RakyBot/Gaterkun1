@@ -109,9 +109,9 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 }
                 
                 if (count > 1) {
-                    return `Queued ${count} tracks.`;
+                    return `📄｜Queued ${count} tracks.`;
                 } else {
-                    return `Queued ${entries[0].title} by ${"`"}${entries[0].author}${"`"}.`
+                    return `📄｜Queued [${entries[0].title}](${entries[0].source}) by ${"`"}${entries[0].author}${"`"}.`
                 }
                 
 
@@ -119,12 +119,14 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         }
     }
 
-    async remove(guildId: Snowflake, index: number): Promise<boolean> { // Expects a 0-based index
+    async remove(guildId: Snowflake, index: number): Promise<TrackEntry | false> { // Expects a 0-based index
         const guildQueue = this.queueMap.get(guildId)
+        let removedTrack: TrackEntry
         if (guildQueue) {
             if (await stateManager.can.remove(guildQueue)) {
 
                 if (index >= 0) {
+                    removedTrack = guildQueue.queue[index]
                     mapMutator.deleteTrack(this.queueMap, guildId, index); // Delete the track
 
                     if (guildQueue.currentTrack == index) { // Current track is being removed
@@ -147,7 +149,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
 
                 }
 
-                return true;
+                return removedTrack;
             }
         }
 
@@ -155,7 +157,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
 
     }
 
-    async move(guildId: Snowflake, oldIndex: number, newIndex: number): Promise<boolean> {
+    async move(guildId: Snowflake, oldIndex: number, newIndex: number): Promise<TrackEntry | false> {
 
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
@@ -173,7 +175,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
 
                         mapMutator.moveTrack(this.queueMap, guildId, oldIndex, newIndex);
 
-                        return true;
+                        return guildQueue.queue[newIndex];
 
                     }
 
@@ -252,6 +254,8 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
             })
 
         }
+
+        guildQueue.player.stop(); // Stop all tracks playing
         
         return true;
     }
@@ -271,7 +275,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         }
     }
 
-    async goto(guildId: Snowflake, index: number): Promise<boolean> {
+    async goto(guildId: Snowflake, index: number): Promise<TrackEntry | false> {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
             if (await stateManager.can.play(guildQueue)) {
@@ -295,12 +299,11 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         }
     }
 
-    async loadTrack(guildId: Snowflake, position: number): Promise<boolean> {
+    async loadTrack(guildId: Snowflake, position: number): Promise<TrackEntry | false> {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
             if (stateManager.can.add(guildQueue)) {
                 
-                console.log('LOADTRACK: Loading the resource')
                 const resource = await createResource(guildQueue.queue[position]) // Load the resource
                 guildQueue.player.play(resource) // Play the resource being loaded
 
@@ -311,7 +314,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
 
                 mapMutator.changeCurrentTrack(this.queueMap, guildId, position) // Mutate the map (currentTrack)
 
-                return true;
+                return guildQueue.queue[position];
 
             }
         }

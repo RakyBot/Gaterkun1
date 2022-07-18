@@ -2,19 +2,20 @@ import RFCommand from "../commandClass";
 import { Client, CommandInteraction, GuildMember, VoiceChannel } from "discord.js";
 import { config } from "../../modules/config";
 import { joinVoiceChannel } from "@discordjs/voice";
+import { basicEmbed, colorPalette } from "../../modules/responses";
 
-export default class JoinCommand extends RFCommand {
+export default class ConnectCommand extends RFCommand {
     constructor(client: Client) {
         super(client)
     }
 
     slashInfo = {
-        name: 'join',
-        description: "Ask me to join your channel.",
+        name: 'connect',
+        description: "Ask me to connect to your channel.",
         options: [
             {
                 name: "channel",
-                description: "Choose a different channel for me to join.",
+                description: "Choose a different channel for me to connect to.",
                 type: "CHANNEL",
                 required: false
             },
@@ -50,7 +51,8 @@ export default class JoinCommand extends RFCommand {
                 adapterCreator: voiceChannel.guild.voiceAdapterCreator
             })
 
-            return res(interaction.editReply(`Joined <#${voiceChannel.id}>.`))
+
+            return res(interaction.editReply({ embeds: [ basicEmbed( `🚪｜Joined <#${voiceChannel.id}>.`, colorPalette.trackOperation ) ] }))
 
         })
     }

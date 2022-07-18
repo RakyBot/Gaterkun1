@@ -2,6 +2,7 @@ import RFCommand from "../commandClass";
 import { Client, CommandInteraction } from "discord.js";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
+import { basicEmbed, colorPalette } from "../../modules/responses";
 
 export default class SkipCommand extends RFCommand {
     constructor(client: Client) {
@@ -21,7 +22,12 @@ export default class SkipCommand extends RFCommand {
                 if (!guildQueue) return await interaction.editReply("Could not skip the track.").catch(err => {})
             
             const result = await new Queue(interaction.client, queueMap).goto(guild.id, guildQueue.currentTrack + 1)
-            return await interaction.editReply(result ? "Track paused." : "Could not pause the music bot.").catch(err => {})
+
+            if (result) {
+                return interaction.editReply({ embeds: [ basicEmbed( `🔊｜Now playing: [${result.title}](${result.source}) by ${"`"}${result.author}${"`"}`, colorPalette.trackOperation ) ] })
+            } else {
+                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜There was an error skipping the track.`, colorPalette.error ) ] })
+            }
 
         })
     }

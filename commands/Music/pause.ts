@@ -2,6 +2,7 @@ import RFCommand from "../commandClass";
 import { Client, CommandInteraction } from "discord.js";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
+import { basicEmbed, colorPalette } from "../../modules/responses";
 
 export default class MoveCommand extends RFCommand {
     constructor(client: Client) {
@@ -18,8 +19,11 @@ export default class MoveCommand extends RFCommand {
 
             const guild = interaction.guild
             const result = await new Queue(interaction.client, queueMap).pause(guild.id)
-
-            return await interaction.editReply(result ? "Track paused." : "Could not pause the music bot.").catch(err => {})
+            if (result) {
+                return interaction.editReply({ embeds: [ basicEmbed( `⏸️｜Paused the track.`, colorPalette.trackOperation ) ] })
+            } else {
+                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜Could not pause the track.`, colorPalette.error ) ] })
+            }
 
         })
     }

@@ -45,5 +45,24 @@ export default { // NOTE: This module expects zero-based indexes
         queueMap.set(guildId, guildQueue)
         return true;
     },
+
+    setLoop(queueMap: queueMapType, guildId: Snowflake, loopType: "QUEUE" | "TRACK", state: boolean) {
+        const guildQueue = queueMap.get(guildId)
+            if (!guildQueue) return false;
+        
+        if (loopType == "QUEUE") {
+
+            guildQueue.settings.queueLoop = state
+
+        } else if (loopType == "TRACK") {
+
+            guildQueue.settings.trackLoop = state
+
+        }
+
+        queueMap.set(guildId, guildQueue)
+        return true;
+        
+    }
     
 }

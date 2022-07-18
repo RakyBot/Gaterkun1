@@ -2,6 +2,7 @@ import RFCommand from "../commandClass";
 import { Client, CommandInteraction } from "discord.js";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
+import { basicEmbed, colorPalette } from "../../modules/responses";
 
 export default class MoveCommand extends RFCommand {
     constructor(client: Client) {
@@ -36,7 +37,11 @@ export default class MoveCommand extends RFCommand {
 
             const result = await new Queue(interaction.client, queueMap).move(guild.id, oldIndex, newIndex)
 
-            return await interaction.editReply(result ? "Track moved!" : "Could not move track.").catch(err => {})
+            if (result) {
+                return interaction.editReply({ embeds: [ basicEmbed( `🛒｜Moved [${result.title}](${result.source}) by ${"`"}${result.author}${"`"} to position ${"`"}${newIndex + 1}${"`"}.`, colorPalette.success ) ] })
+            } else {
+                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜Could not move the requested track to position ${newIndex + 1}.`, colorPalette.error ) ] })
+            }
 
         })
     }
