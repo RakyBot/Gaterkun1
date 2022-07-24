@@ -5,6 +5,7 @@ import CommandHandler from './modules/commandHandler'
 import Queue, { QueueEntry } from './musicHandler/queue'
 import loadManager from './musicHandler/loadManager'
 import queuePageButtons from './modules/queuePages'
+import PrivateVC from './modules/privateVC'
 
 
 const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILDS] })
@@ -43,6 +44,10 @@ client.on('ready', async () => {
 
         return;
         
+    })
+
+    client.on('voiceStateUpdate', async (oldState, newState) => {
+        new PrivateVC(client, oldState, newState).update().catch(() => {});
     })
 
 })
