@@ -47,7 +47,7 @@ client.on('ready', async () => {
     })
 
     client.on('voiceStateUpdate', async (oldState, newState) => {
-        new PrivateVC(client, oldState, newState).update().catch(() => {});
+        new PrivateVC(client, oldState, newState).update().catch((err) => { return; });
     })
 
 })
