@@ -42,7 +42,7 @@ export default class QueueCommand extends RFCommand {
             if (guildQueue.player.state.status === AudioPlayerStatus.Playing) {
                 function fmtMSS(s: number){return(s-(s%=60))/60+(9<s?':':':0')+s} // Seconds -> M:SS
                 const currentTrack = guildQueue.queue[guildQueue.currentTrack]
-                timeRemaining = currentTrack ? `${"`"}${fmtMSS(Math.floor(guildQueue.currentResource.playbackDuration / 1000))}${"`"}/${"`"}${fmtMSS(Number(currentTrack.duration))}${"`"}` : "`No track is currently playing.`"
+                timeRemaining = currentTrack ? `${"`"}${fmtMSS(Math.floor(guildQueue.currentResource.resource.playbackDuration / 1000) + guildQueue.currentResource.savedPassedTime)}${"`"}/${"`"}${fmtMSS(Number(currentTrack.duration))}${"`"}` : "`No track is currently playing.`"
             }
 
             const queueEmbed = {

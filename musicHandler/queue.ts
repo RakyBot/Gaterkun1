@@ -27,7 +27,10 @@ export type QueueEntry = {
     client: Client,
     queue: TrackEntry[],
     currentTrack: number,
-    currentResource: AudioResource,
+    currentResource: {
+        resource: AudioResource,
+        savedPassedTime: number,
+    },
     player: AudioPlayer,
     activeEmbeds: activeEmbed[],
     settings: {
@@ -38,12 +41,15 @@ export type QueueEntry = {
 
 export type queueMapType = Map<Snowflake, QueueEntry>
 
-export async function createResource(track: TrackEntry) {
+export async function createResource(track: TrackEntry, seek?: number) {
     if (track.sourceType == "YOUTUBE") {
-        let stream = await play.stream(track.source)
+        let stream = await play.stream(track.source, {
+            seek: seek ? seek : 0,
+        }).catch(err => {
+            throw err;
+        })
         return createAudioResource(stream.stream, {
             inputType: stream.type,
-            
         });
     } else if (track.sourceType == "DISCORD") {
         return createAudioResource(track.source);
@@ -459,12 +465,20 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         }
     }
 
-    async loadTrack(guildId: Snowflake, position: number): Promise<TrackEntry | false> {
+    async loadTrack(guildId: Snowflake, position: number, time?: number): Promise<TrackEntry | false> {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
             if (stateManager.can.add(guildQueue)) {
+
+                let passedTime = 0
+                if (guildQueue.currentResource && guildQueue.currentResource.resource) {
+                    passedTime = Math.floor(guildQueue.currentResource.resource.playbackDuration / 1000)
+                }
                 
-                const resource = await createResource(guildQueue.queue[position]) // Load the resource
+                const resource = await createResource(guildQueue.queue[position], time).catch((err) => {
+                    return false;
+                }) as AudioResource // Load the resource
+                    if (!resource) return false;
                 guildQueue.player.play(resource) // Play the resource being loaded
 
                 const connection = getVoiceConnection(guildId)
@@ -473,7 +487,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 }
 
                 mapMutator.changeCurrentTrack(this.queueMap, guildId, position) // Mutate the map (currentTrack)
-                mapMutator.changeCurrentResource(this.queueMap, guildId, resource) // Mutate the map (currentResource)
+                mapMutator.changeCurrentResource(this.queueMap, guildId, resource, passedTime) // Mutate the map (currentResource)
 
                 return guildQueue.queue[position];
 

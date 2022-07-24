@@ -10,6 +10,8 @@ import resume from './Music/resume'
 import skip from './Music/skip'
 import loop from './Music/loop'
 import goto from './Music/goto'
+import fastforward from './Music/fastForward'
+import rewind from './Music/rewind'
 
 export default [
     connect,
@@ -24,4 +26,6 @@ export default [
     skip,
     loop,
     goto,
+    fastforward,
+    rewind,
 ]

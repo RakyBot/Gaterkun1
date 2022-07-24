@@ -47,11 +47,14 @@ export default { // NOTE: This module expects zero-based indexes
         return true;
     },
 
-    changeCurrentResource(queueMap: queueMapType, guildId: Snowflake, newResource: AudioResource) {
+    changeCurrentResource(queueMap: queueMapType, guildId: Snowflake, newResource: AudioResource, passedTime?: number) {
         const guildQueue = queueMap.get(guildId)
-        if (!guildQueue) return false;
+            if (!guildQueue) return false;
     
-        guildQueue.currentResource = newResource
+        guildQueue.currentResource = {
+            resource: newResource,
+            savedPassedTime: passedTime ? passedTime : 0,
+        }
 
         queueMap.set(guildId, guildQueue)
         return true;
