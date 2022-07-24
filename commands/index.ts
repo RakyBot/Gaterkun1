@@ -9,6 +9,7 @@ import pause from './Music/pause'
 import resume from './Music/resume'
 import skip from './Music/skip'
 import loop from './Music/loop'
+import goto from './Music/goto'
 
 export default [
     connect,
@@ -22,4 +23,5 @@ export default [
     resume,
     skip,
     loop,
+    goto,
 ]

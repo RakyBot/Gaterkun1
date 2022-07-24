@@ -47,7 +47,7 @@ function listeners(client: Client, Queue: Queue, guildId: Snowflake) {
         }
 
         timer = setTimeout(() => {
-            Queue.clear(guildId)
+            Queue.clear(guildId, true)
             getVoiceConnection(guildId).destroy();
             return;
         }, (parseInt(process.env.TIMEOUT_MS))) // Auto timeout

@@ -1,3 +1,4 @@
+import { AudioResource } from "@discordjs/voice";
 import { Snowflake } from "discord.js";
 import { queueMapType, TrackEntry } from "./queue";
 
@@ -41,6 +42,16 @@ export default { // NOTE: This module expects zero-based indexes
             if (!guildQueue) return false;
         
         guildQueue.currentTrack = newCurrentTrack
+
+        queueMap.set(guildId, guildQueue)
+        return true;
+    },
+
+    changeCurrentResource(queueMap: queueMapType, guildId: Snowflake, newResource: AudioResource) {
+        const guildQueue = queueMap.get(guildId)
+        if (!guildQueue) return false;
+    
+        guildQueue.currentResource = newResource
 
         queueMap.set(guildId, guildQueue)
         return true;

@@ -1,5 +1,5 @@
-import { AudioPlayer, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection, AudioPlayerStatus } from "@discordjs/voice";
-import { Client, Snowflake } from "discord.js";
+import { AudioPlayer, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection, AudioPlayerStatus, AudioResource } from "@discordjs/voice";
+import { Client, MessageActionRow, MessageButton, Snowflake } from "discord.js";
 import play from 'play-dl'
 import mapMutator from "./mapMutator";
 import queryFilter from "./queryFilter";
@@ -8,8 +8,18 @@ import stateManager from './stateManager'
 export type TrackEntry = {
     title: string,
     author: string,
+    duration: number,
     sourceType: "DISCORD" | "YOUTUBE",
     source: string,
+}
+
+export type activeEmbed = {
+    messageId: Snowflake,
+    authorId: Snowflake,
+    pageCount: number,
+    currentPage: number,
+    trackCount: number,
+    lastUsed: number,
 }
 
 export type QueueEntry = {
@@ -17,13 +27,14 @@ export type QueueEntry = {
     client: Client,
     queue: TrackEntry[],
     currentTrack: number,
+    currentResource: AudioResource,
     player: AudioPlayer,
+    activeEmbeds: activeEmbed[],
     settings: {
         trackLoop: boolean,
         queueLoop: boolean,
     },
 }
-
 
 export type queueMapType = Map<Snowflake, QueueEntry>
 
@@ -32,6 +43,7 @@ export async function createResource(track: TrackEntry) {
         let stream = await play.stream(track.source)
         return createAudioResource(stream.stream, {
             inputType: stream.type,
+            
         });
     } else if (track.sourceType == "DISCORD") {
         return createAudioResource(track.source);
@@ -55,11 +67,13 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 client: this.client,
                 queue: [],
                 currentTrack: 0,
+                currentResource: undefined,
                 player: createAudioPlayer({
                     behaviors: {
                         noSubscriber: NoSubscriberBehavior.Pause, // Pause if there is no active connection
                     }
                 }),
+                activeEmbeds: [],
                 settings: {
                     trackLoop: false,
                     queueLoop: false,
@@ -75,11 +89,13 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
             client: this.client,
             queue: [],
             currentTrack: 0,
+            currentResource: undefined,
             player: createAudioPlayer({
                 behaviors: {
                     noSubscriber: NoSubscriberBehavior.Pause, // Pause if there is no active connection
                 }
             }),
+            activeEmbeds: [],
             settings: {
                 trackLoop: false,
                 queueLoop: false,
@@ -221,7 +237,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         return false;
     }
 
-    clear(guildId: Snowflake, settings?: boolean) { // Are we clearing the settings for the guild too?
+    clear(guildId: Snowflake, settings?: boolean) { // settings: Are we clearing the settings for the guild too?
         const guildQueue = this.queueMap.get(guildId)
             if (!guildQueue) return false;
         
@@ -232,7 +248,9 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 client: this.client,
                 queue: [],
                 currentTrack: 0,
+                currentResource: undefined,
                 player: guildQueue.player,
+                activeEmbeds: [],
                 settings: {
                     trackLoop: false,
                     queueLoop: false,
@@ -246,7 +264,9 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 client: this.client,
                 queue: [],
                 currentTrack: 0,
+                currentResource: undefined,
                 player: guildQueue.player,
+                activeEmbeds: guildQueue.activeEmbeds,
                 settings: {
                     trackLoop: guildQueue.settings.trackLoop,
                     queueLoop: guildQueue.settings.queueLoop,
@@ -259,6 +279,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         
         return true;
     }
+
 
     async printQueue(guildId: Snowflake) {
         const guildQueue = this.queueMap.get(guildId)
@@ -274,6 +295,145 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
             return titles.join()
         }
     }
+    constructEmbed(guildId: Snowflake, startingPage?: number) {
+        
+        const guildQueue = this.queueMap.get(guildId)
+            if (!guildQueue) return false;
+        
+        let trackArray = [[]]
+        let count = 0
+        let pageCount = 1
+        let currentPage = startingPage ? startingPage : 1
+        let currentTrackPage
+
+        for (const [trackIndex, track] of guildQueue.queue.entries()) {
+
+            count++
+    
+            if (count > 25) {
+                pageCount++
+                trackArray[pageCount - 1] = [] // make a new array for the page
+                count = 0
+            }
+
+            if (trackIndex == guildQueue.currentTrack) currentTrackPage = pageCount
+
+            trackArray[pageCount - 1].push({
+                name: '\u200b',
+                value: `${trackIndex == guildQueue.currentTrack ? `**>> ${trackIndex + 1}:**    [${track.title}](${track.source})` : `**${trackIndex + 1}:**    [${track.title}](${track.source})`}\nBy: ${"`"}${track.author}${"`"}`
+            })
+    
+        }
+
+        if (startingPage > pageCount) return false; // Invalid Page
+        if (!startingPage) currentPage = currentTrackPage // Set the page of the current track to be displayed first
+
+        const row = new MessageActionRow()
+            .addComponents([
+    
+                // Previous Page Button
+                new MessageButton()
+                    .setCustomId('previousQueuePage')
+                    .setEmoji(`⬅️`)
+                    .setStyle('PRIMARY')
+                    .setDisabled(currentPage > 1 ? false : true),
+                
+                // Next Page Button 
+                new MessageButton()
+                    .setCustomId('nextQueuePage')
+                    .setEmoji(`➡️`)
+                    .setStyle('PRIMARY')
+                    .setDisabled(((pageCount > 1) && (currentPage < pageCount)) ? false : true)
+                
+            ]);
+    
+        return {
+            trackArray: trackArray,
+            pageCount: pageCount,
+            currentPage: currentPage,
+            messageActionRow: row
+        }
+
+    }
+    registerEmbed(guildId: Snowflake, messageId: Snowflake, authorId: Snowflake, currentPage: number, pageCount: number, trackCount: number) {
+
+        const guildQueue = this.queueMap.get(guildId)
+            if (!guildQueue) return false;
+    
+        const timestamp = Math.floor(Date.now() / 1000)
+        
+        guildQueue.activeEmbeds.push({
+            messageId: messageId,
+            authorId: authorId,
+            pageCount: pageCount,
+            currentPage: currentPage,
+            trackCount: trackCount,
+            lastUsed: timestamp
+        })
+
+        this.queueMap.set(guildId, guildQueue)
+
+        return true;
+
+    }
+    updateEmbed(guildId: string, messageId: string, currentPage?: number, pageCount?: number, trackCount?: number) {
+        
+        const queue = this.queueMap.get(guildId)
+            if (!queue) return false;
+    
+        const timestamp = Math.floor(Date.now() / 1000)
+
+        for (const embed of queue.activeEmbeds) {
+
+            if (embed.messageId == messageId) { // match found
+
+                currentPage ? embed.currentPage = currentPage : []
+                pageCount ? embed.pageCount = pageCount : []
+                trackCount ? embed.trackCount = trackCount : []
+                
+                embed.lastUsed = timestamp
+                
+                return true;
+
+            } else {
+                
+                continue;
+            
+            }
+
+        }
+
+    }
+    getQueueEmbed(guildId: string, messageId: string) {
+        const queue = this.queueMap.get(guildId)
+            if (!queue) return false;
+        
+        let embedObj: activeEmbed
+        for (const embed of queue.activeEmbeds) {
+            if (embed.messageId == messageId) return embedObj = embed;
+        }
+
+        return embedObj ? embedObj : false
+    }
+    renewQueueEmbed(guildId: string, messageId: string) {
+        const queue = this.queueMap.get(guildId)
+            if (!queue) return false;
+        
+        const timestamp = Math.floor(Date.now() / 1000)
+
+        for (const [index, embedObj] of Array.from(queue.activeEmbeds.entries())) {
+            
+            if (embedObj.messageId == messageId) {
+                queue.activeEmbeds[index].lastUsed = timestamp
+            }
+
+        }
+        
+        this.queueMap.set(guildId, queue)
+
+        return true;
+    }
+
 
     async goto(guildId: Snowflake, index: number): Promise<TrackEntry | false> {
         const guildQueue = this.queueMap.get(guildId)
@@ -313,6 +473,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 }
 
                 mapMutator.changeCurrentTrack(this.queueMap, guildId, position) // Mutate the map (currentTrack)
+                mapMutator.changeCurrentResource(this.queueMap, guildId, resource) // Mutate the map (currentResource)
 
                 return guildQueue.queue[position];
 

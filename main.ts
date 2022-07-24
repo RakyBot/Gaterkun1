@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv'
 import CommandHandler from './modules/commandHandler'
 import Queue, { QueueEntry } from './musicHandler/queue'
 import loadManager from './musicHandler/loadManager'
+import queuePageButtons from './modules/queuePages'
 
 
 const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILDS] })
@@ -21,9 +22,16 @@ client.on('ready', async () => {
     
     client.on('interactionCreate', interaction => {
         if (interaction.isCommand() && interaction.inGuild()) {
+
             new CommandHandler(client).handler(interaction, queueMap);
-            return;
+
+        } else if (interaction.isButton() && interaction.inGuild()) {
+
+            queuePageButtons(interaction, queueMap).catch(() => {});
+            
         }
+
+        return;
     })
 
     client.on('guildCreate', async (guild) => {

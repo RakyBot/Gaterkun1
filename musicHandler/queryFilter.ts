@@ -10,6 +10,10 @@ import { TrackEntry } from './queue'
 import * as ytdl from 'ytdl-core'
 import * as ytSearch from 'yt-search'
 import * as ytpl from 'ytpl'
+import * as ytMusic from 'node-youtube-music'
+import * as play from 'play-dl'
+
+import { getVideoDurationInSeconds } from 'get-video-duration'
 
 // Spotify
 import * as unfetch from "isomorphic-unfetch"
@@ -25,7 +29,16 @@ export default {
 
         // Insert Regexs here to decide if it's a link or search request
         if (query.match(discordCDN)) { // Discord
-            return false; /////////////////////////////// To-Do ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            
+            return [
+                {
+                    title: query.match(discordCDN)[6],
+                    author: "Unknown",
+                    duration: Math.floor(await getVideoDurationInSeconds(query)),
+                    sourceType: "DISCORD",
+                    source: query,
+                }
+            ]
 
         } else if (query.match(spotifyLink)) { // Spotify
             const tracks = await getTracks(query)
@@ -40,15 +53,17 @@ export default {
                             artists = `${artists}, ${artist.name}`
                         }
 
-                        const resource = await ytSearch(`${track.name} ${track.artists[0]} audio`)
-                        if (resource.videos[0].videoId)
+                        const resource = await ytMusic.searchMusics(`${track.name} ${artists}`)
+                        if (resource[0].youtubeId) {
+                            links.push({
+                                title: track.name,
+                                author: artists,
+                                duration: resource[0].duration.totalSeconds,
+                                sourceType: "YOUTUBE",
+                                source: `https://youtube.com/watch?v=${resource[0].youtubeId}`,
+                            })
+                        }
 
-                        links.push({
-                            title: track.title,
-                            author: track.author.name,
-                            sourceType: "YOUTUBE",
-                            source: resource.videos[0].url,
-                        })
                         continue;
                     }
                     return links;
@@ -63,16 +78,19 @@ export default {
                         artists = `${artists}, ${artist.name}`
                     }
 
-                    const resource = await ytSearch(`${track.name} ${track.artists[0]} audio`)
-
-                    return [
-                        {
-                            title: track.title,
-                            author: track.author.name,
+                    const resource = await ytMusic.searchMusics(`${track.name} ${artists}`)
+                    console.log(resource)
+                    if (resource) {
+                        return [
+                            {
+                            title: track.name,
+                            author: artists,
+                            duration: resource[0].duration.totalSeconds,
                             sourceType: "YOUTUBE",
-                            source: resource.videos[0].url,
-                        }
-                    ]
+                            source: `https://youtube.com/watch?v=${resource[0].youtubeId}`,
+                            }
+                        ]
+                    }
 
                 }
 
@@ -86,6 +104,7 @@ export default {
                 links.push({
                     title: track.title,
                     author: track.author.name,
+                    duration: track.durationSec,
                     sourceType: "YOUTUBE",
                     source: track.url,
                 })
@@ -95,13 +114,14 @@ export default {
             return links;
 
         } else if (ytdl.validateURL(query)) { // YouTube Direct Link
-            const track = await ytdl.getBasicInfo(query).catch((err) => { throw err })
+            const track = await play.video_info(query)
             return [
                 {
-                    title: track.videoDetails.title,
-                    author: track.videoDetails.author.name,
+                    title: track.video_details.title,
+                    author: track.video_details.channel.name,
+                    duration: track.video_details.durationInSec,
                     sourceType: "YOUTUBE",
-                    source: track.videoDetails.video_url,
+                    source: track.video_details.url,
                 }
             ]
 
@@ -118,6 +138,7 @@ export default {
                     {
                         title: track.title,
                         author: track.author.name,
+                        duration: track.duration.seconds,
                         sourceType: "YOUTUBE",
                         source: track.url
                     }
