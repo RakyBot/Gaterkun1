@@ -44,7 +44,7 @@ export default class PrivateVC {
                 
                 // Check old channel if it expired
                 const oldChannel = this.oldVoiceState.channel as VoiceChannel
-                if (oldChannel && oldChannel.id != config.createVC) {
+                if (oldChannel && oldChannel.id != config.createVC && oldChannel.parentId == config.vcCategory) {
                     const connectedMembers = Array.from(oldChannel.members.entries())
                     if (connectedMembers.length <= 0) {
                         oldChannel.delete("VC Expired.").catch((err) => {})
