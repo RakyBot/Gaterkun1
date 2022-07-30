@@ -1,12 +1,54 @@
 import { Client, Snowflake } from "discord.js"
 import { AudioPlayerStatus, getVoiceConnection } from "@discordjs/voice"
-import Queue from "./queue"
+import Queue, { QueueEntry } from "./queue"
 
 // Reference States
 import states from "./stateManager"
 
 // Base function
 // To load songs and listen for player state changes
+
+export async function loader(Queue: Queue, guildId: Snowflake) {
+    const guildQueue = Queue.queueMap.get(guildId)
+    if (!guildQueue) return;
+
+
+    if (states.can.play(guildQueue)) { // The bot can do this action
+
+        if (guildQueue.settings.trackLoop) {
+
+            await Queue.goto(guildId, guildQueue.currentTrack); // Go to current
+            return;
+            
+        } else if (guildQueue.settings.queueLoop) {
+
+            if ((guildQueue.currentTrack + 1 /* convert from index to count */) == guildQueue.queue.length) { // We've reached the last song
+
+                await Queue.goto(guildId, 0); // Go back to start
+                return;
+
+            } else {
+
+                await Queue.goto(guildId, guildQueue.currentTrack + 1); // Go to next
+                return;
+
+            }
+
+        } else {
+            
+            if (guildQueue.queue[guildQueue.currentTrack + 1]) {
+
+                await Queue.goto(guildId, guildQueue.currentTrack + 1); // Go to next
+                return;
+
+            }
+
+        }
+    
+    }
+
+}
+
 function listeners(client: Client, Queue: Queue, guildId: Snowflake) {
     const guildQueue = Queue.queueMap.get(guildId)
     if (!guildQueue) return;
@@ -16,35 +58,7 @@ function listeners(client: Client, Queue: Queue, guildId: Snowflake) {
     let timer: NodeJS.Timeout
     player.on(AudioPlayerStatus.Idle, async () => { // (EVENT LISTENER) Go to next track
 
-        if (states.can.play(guildQueue)) { // The bot can do this action
-
-            if (guildQueue.settings.trackLoop) {
-
-                await Queue.goto(guildId, guildQueue.currentTrack); // Go to current
-                return;
-                
-            } else if (guildQueue.settings.queueLoop) {
-
-                if ((guildQueue.currentTrack + 1 /* convert from index to count */) == guildQueue.queue.length) { // We've reached the last song
-
-                    await Queue.goto(guildId, 0); // Go back to start
-                    return;
-
-                } else {
-
-                    await Queue.goto(guildId, guildQueue.currentTrack + 1); // Go to next
-                    return;
-
-                }
-
-            } else {
-
-                await Queue.goto(guildId, guildQueue.currentTrack + 1); // Go to next
-                return;
-
-            }
-        
-        }
+        await loader(Queue, guildId)
 
         timer = setTimeout(() => {
             Queue.clear(guildId, true)

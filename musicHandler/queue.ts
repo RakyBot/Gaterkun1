@@ -1,6 +1,7 @@
 import { AudioPlayer, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection, AudioPlayerStatus, AudioResource } from "@discordjs/voice";
 import { Client, MessageActionRow, MessageButton, Snowflake } from "discord.js";
 import play from 'play-dl'
+import { loader } from "./loadManager";
 import mapMutator from "./mapMutator";
 import queryFilter from "./queryFilter";
 import stateManager from './stateManager'
@@ -127,7 +128,11 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 }
 
                 if (guildQueue.player.state.status == 'idle') {
-                    await this.goto(guildId, guildQueue.currentTrack) // If the bot is just starting or had no next track, it needs a trigger to start.
+                    if (guildQueue.queue.length == 1) {
+                        await this.goto(guildId, guildQueue.currentTrack) // If the bot is just starting, it needs a trigger to start.
+                    } else if (guildQueue.queue.length > 1) {
+                        await loader(this, guildId) // Ask the loader to handle if there are already songs in the queue
+                    }
                 }
                 
                 if (count > 1) {
@@ -445,6 +450,8 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
             if (await stateManager.can.play(guildQueue)) {
+
+                console.log(`Going to index: ${index}`) // ?????
 
                 const queue = guildQueue.queue
                 if (queue[index]) {
