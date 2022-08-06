@@ -95,7 +95,7 @@ export default {
                 }
 
         } else if (playlistID) { // YouTube Playlist
-            const playlist = await ytpl(playlistID).catch((err) => { throw err })
+            const playlist = await ytpl(playlistID).catch((err) => { return false }) as ytpl.Result
             const tracks = playlist.items
 
             let links: TrackEntry[] = []
@@ -127,7 +127,7 @@ export default {
 
         } else { // Search Query
             const trackFinder = async (query) => {  
-                const trackResult = await ytSearch(query).catch((err) => { throw err })
+                const trackResult = await ytSearch(query).catch((err) => { return false }) as ytSearch.SearchResult
                 return (trackResult.videos.length > 1) ? trackResult.videos[0] : null;
             }
 
