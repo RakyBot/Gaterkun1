@@ -12,6 +12,7 @@ import loop from './Music/loop'
 import goto from './Music/goto'
 import fastforward from './Music/fastForward'
 import rewind from './Music/rewind'
+import settime from './Music/settime'
 
 export default [
     connect,
@@ -28,4 +29,5 @@ export default [
     goto,
     fastforward,
     rewind,
+    settime,
 ]

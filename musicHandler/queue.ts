@@ -295,8 +295,6 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
     async printQueue(guildId: Snowflake) {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
-            console.log(guildQueue.queue)
-            console.log("Current Track Index: ", guildQueue.currentTrack)
             let titles = []
             for (const track of guildQueue.queue) {
 
@@ -451,8 +449,6 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         if (guildQueue) {
             if (await stateManager.can.play(guildQueue)) {
 
-                console.log(`Going to index: ${index}`) // ?????
-
                 const queue = guildQueue.queue
                 if (queue[index]) {
 
@@ -479,7 +475,11 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
 
                 let passedTime = 0
                 if (guildQueue.currentResource && guildQueue.currentResource.resource) {
-                    passedTime = Math.floor(guildQueue.currentResource.resource.playbackDuration / 1000)
+                    if (time) {
+                        passedTime = time
+                    } else {
+                        passedTime = Math.floor(guildQueue.currentResource.resource.playbackDuration / 1000)
+                    }
                 }
                 
                 const resource = await createResource(guildQueue.queue[position], time).catch((err) => {
