@@ -77,3 +77,6 @@ typings/
 
 # Cookies/Tokens
 .data/
+
+# TypeScript Compiler
+dist/
