@@ -30,7 +30,9 @@ export default class QueueCommand extends RFCommand {
                 queueStatus = "🔂｜Looping the current track."
             } else if (guildQueue.settings.queueLoop) {
                 queueStatus = "🔁｜Looping the queue."
-            } else {
+            } else if (guildQueue.settings.shuffle) {
+                queueStatus = "🔀｜Shuffling the queue."
+            }else {
                 queueStatus = "🟦｜Not looping."
             }
 

@@ -34,6 +34,20 @@ export async function loader(Queue: Queue, guildId: Snowflake) {
 
             }
 
+        } else if (guildQueue.settings.shuffle) {
+
+            const queueLength = guildQueue.queue.length
+
+            const max = queueLength
+            const min = 0
+
+            const randomTrack = Math.floor(Math.random() * (max - min) + min);
+
+            console.log(randomTrack) // not working?
+
+            await Queue.goto(guildId, randomTrack); // Go to random number
+            return;
+
         } else {
             
             if (guildQueue.queue[guildQueue.currentTrack + 1]) {

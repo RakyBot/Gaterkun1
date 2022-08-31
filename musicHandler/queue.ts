@@ -37,6 +37,7 @@ export type QueueEntry = {
     settings: {
         trackLoop: boolean,
         queueLoop: boolean,
+        shuffle: boolean,
     },
 }
 
@@ -84,6 +85,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 settings: {
                     trackLoop: false,
                     queueLoop: false,
+                    shuffle: false,
                 }
             })
         }
@@ -106,6 +108,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
             settings: {
                 trackLoop: false,
                 queueLoop: false,
+                shuffle: false,
             }
         })
 
@@ -265,6 +268,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 settings: {
                     trackLoop: false,
                     queueLoop: false,
+                    shuffle: false,
                 },
             })
 
@@ -281,6 +285,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 settings: {
                     trackLoop: guildQueue.settings.trackLoop,
                     queueLoop: guildQueue.settings.queueLoop,
+                    shuffle: guildQueue.settings.shuffle,
                 },
             })
 

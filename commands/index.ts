@@ -13,6 +13,7 @@ import goto from './Music/goto'
 import fastforward from './Music/fastForward'
 import rewind from './Music/rewind'
 import settime from './Music/settime'
+import shuffle from './Music/shuffle'
 
 export default [
     connect,
@@ -30,4 +31,5 @@ export default [
     fastforward,
     rewind,
     settime,
+    shuffle,
 ]

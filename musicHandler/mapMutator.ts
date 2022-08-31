@@ -2,6 +2,12 @@ import { AudioResource } from "@discordjs/voice";
 import { Snowflake } from "discord.js";
 import { queueMapType, TrackEntry } from "./queue";
 
+const defaultQueueSettings = {
+    queueLoop: false,
+    trackLoop: false,
+    shuffle: false,
+}
+
 export default { // NOTE: This module expects zero-based indexes
 
     insertTrack(queueMap: queueMapType, guildId: Snowflake, track: TrackEntry, index?: number) { // If an index is not specified, track is added to the end.
@@ -66,10 +72,12 @@ export default { // NOTE: This module expects zero-based indexes
         
         if (loopType == "QUEUE") {
 
+            guildQueue.settings = defaultQueueSettings
             guildQueue.settings.queueLoop = state
 
         } else if (loopType == "TRACK") {
 
+            guildQueue.settings = defaultQueueSettings
             guildQueue.settings.trackLoop = state
 
         }
@@ -77,6 +85,19 @@ export default { // NOTE: This module expects zero-based indexes
         queueMap.set(guildId, guildQueue)
         return true;
         
-    }
+    },
+
+    setShuffle(queueMap: queueMapType, guildId: Snowflake, state: boolean) {
+
+        const guildQueue = queueMap.get(guildId)
+            if (!guildQueue) return false;
+        
+        guildQueue.settings = defaultQueueSettings
+        guildQueue.settings.shuffle = state
+
+        queueMap.set(guildId, guildQueue)
+        return true;
+        
+    },
     
 }
