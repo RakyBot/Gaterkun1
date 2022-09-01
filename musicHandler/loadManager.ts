@@ -50,7 +50,13 @@ export async function loader(Queue: Queue, guildId: Snowflake) {
 
         } else {
             
+            if (guildQueue.currentTrack == 0) { // When the bot is first starting it needs a push to start the queue.
+                await Queue.goto(guildId, guildQueue.currentTrack);
+                return;
+            }
+
             if (guildQueue.queue[guildQueue.currentTrack + 1]) {
+                console.log("load manager invoked; going to track number ", guildQueue.currentTrack + 1)
 
                 await Queue.goto(guildId, guildQueue.currentTrack + 1); // Go to next
                 return;
@@ -65,7 +71,7 @@ export async function loader(Queue: Queue, guildId: Snowflake) {
 
 function listeners(client: Client, Queue: Queue, guildId: Snowflake) {
     const guildQueue = Queue.queueMap.get(guildId)
-    if (!guildQueue) return;
+        if (!guildQueue) return;
 
     const player = guildQueue.player
 

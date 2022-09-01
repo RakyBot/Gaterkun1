@@ -131,11 +131,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 }
 
                 if (guildQueue.player.state.status == 'idle') {
-                    if (guildQueue.queue.length == 1) {
-                        await this.goto(guildId, guildQueue.currentTrack) // If the bot is just starting, it needs a trigger to start.
-                    } else if (guildQueue.queue.length > 1) {
-                        await loader(this, guildId) // Ask the loader to handle if there are already songs in the queue
-                    }
+                    await loader(this, guildId) // Ask the loader to handle if there are already songs in the queue
                 }
                 
                 if (count > 1) {
