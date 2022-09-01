@@ -76,7 +76,7 @@ typings/
 .fusebox/
 
 # Cookies/Tokens
-.data/
+.data/youtube.data
 
 # TypeScript Compiler
 dist/
