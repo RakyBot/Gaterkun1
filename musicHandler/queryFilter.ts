@@ -41,7 +41,7 @@ export default {
             ]
 
         } else if (query.match(spotifyLink)) { // Spotify
-            const tracks = await getTracks(query)
+            const tracks = await getTracks(query).catch((err) => { return false; });
                 if (tracks.length > 1) { // It's a playlist
 
                     let links: TrackEntry[] = []
