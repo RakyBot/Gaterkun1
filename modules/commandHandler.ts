@@ -23,8 +23,13 @@ export default class CommandHandler {
             // Send Commands to Discord
             this.client.application.commands.set(slashCommandsSetData).catch((err) => { throw err; })
 
-            const testGuild = await this.client.guilds.fetch(process.env.TESTGUILD)
-                testGuild.commands.set(slashCommandsSetData).catch((err) => { throw err;})
+            try {
+                const testGuild = await this.client.guilds.fetch(process.env.TESTGUILD);
+                testGuild.commands.set(slashCommandsSetData);
+            } catch (e) {
+                console.error(e);
+            }
+
 
             return resolve(true);
 
