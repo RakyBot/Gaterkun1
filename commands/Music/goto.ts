@@ -1,5 +1,5 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction, GuildMember } from "discord.js";
+import { ApplicationCommandOptionType, Client, ChatInputCommandInteraction, GuildMember } from "discord.js";
 import { joinVoiceChannel } from "@discordjs/voice";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
@@ -17,19 +17,19 @@ export default class GotoCommand extends RFCommand {
             {
                 name: "position",
                 description: "The position in the queue of the track to go to.",
-                type: "INTEGER",
+                type: ApplicationCommandOptionType.Integer,
                 required: true
             },
         ]
     }
 
-    async callback(interaction: CommandInteraction, config: config, queueMap: queueMapType) {
+    async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild
             const position = interaction.options.getInteger('position') - 1
             
-            const result = await new Queue(interaction.client, queueMap).goto(guild.id, position)
+            const result = await new Queue(interaction.client, queueMap).goto(guild.id, position, true)
 
             if (result) {
                 return interaction.editReply({ embeds: [ basicEmbed( `⏭️｜Went to track ${"`"}${position + 1}${"`"}.\n🔊｜Now playing: [${result.title}](${result.source}) by ${"`"}${result.author}${"`"}.`, colorPalette.trackOperation ) ] })

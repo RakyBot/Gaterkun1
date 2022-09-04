@@ -1,5 +1,5 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction, GuildMember, VoiceChannel } from "discord.js";
+import { ApplicationCommandOptionType, ChannelType, Client, ChatInputCommandInteraction, GuildMember, Snowflake, VoiceChannel } from "discord.js";
 import { config } from "../../modules/config";
 import { joinVoiceChannel } from "@discordjs/voice";
 import { basicEmbed, colorPalette } from "../../modules/responses";
@@ -16,25 +16,25 @@ export default class ConnectCommand extends RFCommand {
             {
                 name: "channel",
                 description: "Choose a different channel for me to connect to.",
-                type: "CHANNEL",
+                type: ApplicationCommandOptionType.Channel,
                 required: false
             },
         ]
     }
 
-    async callback(interaction: CommandInteraction, config: config) {
+    async callback(interaction: ChatInputCommandInteraction, config: config) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild
-            const channel = interaction.options.getChannel('channel')
+            const channel = interaction.options.getChannel('channel') as VoiceChannel
             const member = interaction.member as GuildMember
 
             let voiceChannel: VoiceChannel
-            if (channel && channel.type == "GUILD_VOICE") {
+            if (channel && channel.type == ChannelType.GuildVoice) {
 
                 voiceChannel = channel
 
-            } else if (member.voice.channel && member.voice.channel.type == "GUILD_VOICE") {
+            } else if (member.voice.channel && member.voice.channel.type == ChannelType.GuildVoice) {
 
                 voiceChannel = member.voice.channel
 

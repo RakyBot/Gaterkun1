@@ -1,5 +1,5 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction, Guild } from "discord.js";
+import { Client, ChatInputCommandInteraction, Guild } from "discord.js";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
 import { basicEmbed, colorPalette } from "../../modules/responses";
@@ -15,7 +15,7 @@ export default class ShuffleCommand extends RFCommand {
         description: "Shuffles the queue.",
     }
 
-    async callback(interaction: CommandInteraction, config: config, queueMap: queueMapType) {
+    async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild as Guild
@@ -27,6 +27,11 @@ export default class ShuffleCommand extends RFCommand {
             if (shuffled) {
 
                 const result = mapMutator.setShuffle(queueMap, guild.id, false);
+
+                for (const [index, track] of guildQueue.queue.entries()) {
+                    mapMutator.setTrackShuffleState(queueMap, guild.id, index, false); // reset the shuffle state of all songs.
+                }
+
                 return interaction.editReply({ embeds: [ basicEmbed( `🔀｜Stopped shuffling the queue.`, colorPalette.trackOperation ) ] });
 
             } else {

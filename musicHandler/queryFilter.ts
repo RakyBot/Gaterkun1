@@ -37,11 +37,12 @@ export default {
                     duration: Math.floor(await getVideoDurationInSeconds(query)),
                     sourceType: "DISCORD",
                     source: query,
+                    shufflePlayed: false,
                 }
             ]
 
         } else if (query.match(spotifyLink)) { // Spotify
-            const tracks = await getTracks(query).catch((err) => { return false; });
+            const tracks = await getTracks(query).catch((err) => { console.error(err); return false; });
                 if (tracks.length > 1) { // It's a playlist
 
                     let links: TrackEntry[] = []
@@ -61,6 +62,7 @@ export default {
                                 duration: resource[0].duration.totalSeconds,
                                 sourceType: "YOUTUBE",
                                 source: `https://youtube.com/watch?v=${resource[0].youtubeId}`,
+                                shufflePlayed: false,
                             })
                         }
 
@@ -79,7 +81,6 @@ export default {
                     }
 
                     const resource = await ytMusic.searchMusics(`${track.name} ${artists}`)
-                    console.log(resource)
                     if (resource) {
                         return [
                             {
@@ -88,6 +89,7 @@ export default {
                             duration: resource[0].duration.totalSeconds,
                             sourceType: "YOUTUBE",
                             source: `https://youtube.com/watch?v=${resource[0].youtubeId}`,
+                            shufflePlayed: false,
                             }
                         ]
                     }
@@ -107,6 +109,7 @@ export default {
                     duration: track.durationSec,
                     sourceType: "YOUTUBE",
                     source: track.url,
+                    shufflePlayed: false,
                 })
 
             }
@@ -122,6 +125,7 @@ export default {
                     duration: track.video_details.durationInSec,
                     sourceType: "YOUTUBE",
                     source: track.video_details.url,
+                    shufflePlayed: false,
                 }
             ]
 
@@ -140,7 +144,8 @@ export default {
                         author: track.author.name,
                         duration: track.duration.seconds,
                         sourceType: "YOUTUBE",
-                        source: track.url
+                        source: track.url,
+                        shufflePlayed: false,
                     }
                 ];
             

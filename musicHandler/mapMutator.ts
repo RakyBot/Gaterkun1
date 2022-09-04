@@ -99,5 +99,17 @@ export default { // NOTE: This module expects zero-based indexes
         return true;
         
     },
+
+    setTrackShuffleState(queueMap: queueMapType, guildId: Snowflake, trackIndex: number, state: boolean) {
+
+        const guildQueue = queueMap.get(guildId)
+        if (!guildQueue) return false;
+    
+        guildQueue.queue[trackIndex].shufflePlayed = state
+        
+        queueMap.set(guildId, guildQueue)
+        return true;
+
+    }
     
 }

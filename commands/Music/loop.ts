@@ -1,9 +1,9 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, Client } from "discord.js";
 import { config } from "../../modules/config";
-import Queue, { queueMapType } from "../../musicHandler/queue";
+import { queueMapType } from "../../musicHandler/queue";
 import { basicEmbed, colorPalette } from "../../modules/responses";
-import { ApplicationCommandOptionTypes } from "discord.js/typings/enums";
+import { ApplicationCommandOptionType } from "discord.js";
 import mapMutator from "../../musicHandler/mapMutator";
 
 export default class LoopCommand extends RFCommand {
@@ -18,25 +18,25 @@ export default class LoopCommand extends RFCommand {
             {
                 name: "track",
                 description: "Toggle the track loop.",
-                type: ApplicationCommandOptionTypes.SUB_COMMAND,
+                type: ApplicationCommandOptionType.Subcommand,
             },
             {
                 name: "queue",
                 description: "Toggle the queue loop.",
-                type: ApplicationCommandOptionTypes.SUB_COMMAND,
+                type: ApplicationCommandOptionType.Subcommand,
             }
         ]
     }
 
-    async callback(interaction: CommandInteraction, config: config, queueMap: queueMapType) {
+    async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild
-            const subCommand = interaction.options.getSubcommand();
+            const subCommand = interaction.options.getSubcommand()
             const guildQueue = queueMap.get(guild.id)
                 if (!guildQueue) return await interaction.editReply("Could not loop the queue.")
 
-            if (subCommand == "track") {
+            if (subCommand == 'track') {
 
                 const looped = guildQueue.settings.trackLoop
 
@@ -52,7 +52,7 @@ export default class LoopCommand extends RFCommand {
 
                 }
 
-            } else if (subCommand == "queue") {
+            } else if (subCommand == 'queue') {
 
                 const looped = guildQueue.settings.queueLoop
 

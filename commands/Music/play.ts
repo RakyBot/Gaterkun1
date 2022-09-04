@@ -1,5 +1,5 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction, GuildMember } from "discord.js";
+import { ApplicationCommandOptionType, Client, ChatInputCommandInteraction, GuildMember } from "discord.js";
 import { joinVoiceChannel } from "@discordjs/voice";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
@@ -17,13 +17,13 @@ export default class PlayCommand extends RFCommand {
             {
                 name: "query",
                 description: "Search Query (YouTube, Spotify).",
-                type: "STRING",
+                type: ApplicationCommandOptionType.String,
                 required: true
             },
         ]
     }
 
-    async callback(interaction: CommandInteraction, config: config, queueMap: queueMapType) {
+    async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild

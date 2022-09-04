@@ -1,5 +1,5 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction, Message } from "discord.js";
+import { Client, ChatInputCommandInteraction, Message } from "discord.js";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
 import { basicEmbed, colorPalette } from "../../modules/responses";
@@ -15,7 +15,7 @@ export default class QueueCommand extends RFCommand {
         description: "See the current queue",
     }
 
-    async callback(interaction: CommandInteraction, config: config, queueMap: queueMapType) {
+    async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild
@@ -57,7 +57,7 @@ export default class QueueCommand extends RFCommand {
                 }
             }
 
-            const reply = await interaction.editReply({ embeds: [ queueEmbed ], components: [ result.messageActionRow ] }).catch(err => {}) as Message
+            const reply = await interaction.editReply({ embeds: [ queueEmbed ], components: [ result.actionRow ] }).catch(err => {}) as Message
 
             queue.registerEmbed(guild.id, reply.id, interaction.user.id, result.currentPage, result.pageCount, result.trackArray.length)
 

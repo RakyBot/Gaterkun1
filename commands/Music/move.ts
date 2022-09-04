@@ -1,5 +1,5 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionType, Client, ChatInputCommandInteraction } from "discord.js";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
 import { basicEmbed, colorPalette } from "../../modules/responses";
@@ -16,19 +16,19 @@ export default class MoveCommand extends RFCommand {
             {
                 name: "track",
                 description: "The position in the queue of the track to move.",
-                type: "INTEGER",
+                type: ApplicationCommandOptionType.Integer,
                 required: true
             },
             {
                 name: "new_position",
                 description: "The new position in the queue to move the track to.",
-                type: "INTEGER",
+                type: ApplicationCommandOptionType.Integer,
                 required: true
             },
         ]
     }
 
-    async callback(interaction: CommandInteraction, config: config, queueMap: queueMapType) {
+    async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild

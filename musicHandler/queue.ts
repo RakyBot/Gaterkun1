@@ -1,5 +1,5 @@
 import { AudioPlayer, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection, AudioPlayerStatus, AudioResource } from "@discordjs/voice";
-import { Client, MessageActionRow, MessageButton, Snowflake } from "discord.js";
+import { Client, ActionRowBuilder, ButtonBuilder, Snowflake, ButtonStyle, APIActionRowComponent } from "discord.js";
 import play from 'play-dl'
 import { loader } from "./loadManager";
 import mapMutator from "./mapMutator";
@@ -12,6 +12,7 @@ export type TrackEntry = {
     duration: number,
     sourceType: "DISCORD" | "YOUTUBE",
     source: string,
+    shufflePlayed: boolean, // For the shuffle feature, to prevent songs from repeating themselves.
 }
 
 export type activeEmbed = {
@@ -74,7 +75,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 guildId: guild.id,
                 client: this.client,
                 queue: [],
-                currentTrack: 0,
+                currentTrack: -1,
                 currentResource: undefined,
                 player: createAudioPlayer({
                     behaviors: {
@@ -86,7 +87,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                     trackLoop: false,
                     queueLoop: false,
                     shuffle: false,
-                }
+                },
             })
         }
 
@@ -97,7 +98,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
             guildId: guildId,
             client: this.client,
             queue: [],
-            currentTrack: 0,
+            currentTrack: -1,
             currentResource: undefined,
             player: createAudioPlayer({
                 behaviors: {
@@ -109,7 +110,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 trackLoop: false,
                 queueLoop: false,
                 shuffle: false,
-            }
+            },
         })
 
         return true;
@@ -155,7 +156,12 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                     removedTrack = guildQueue.queue[index]
                     mapMutator.deleteTrack(this.queueMap, guildId, index); // Delete the track
 
-                    if (guildQueue.currentTrack == index) { // Current track is being removed
+                    if (guildQueue.queue.length == 0 && guildQueue.currentTrack == 0) { // the first (and only) track of the queue was removed
+
+                        mapMutator.changeCurrentTrack(this.queueMap, guildId, -1); // Reset the queue to -1 so it can start up again
+                        guildQueue.player.stop();
+
+                    } else if (guildQueue.currentTrack == index) { // Current track is being removed
 
                         if (guildQueue.queue[guildQueue.currentTrack]) { // if a next track exists, go to it
 
@@ -247,7 +253,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         return false;
     }
 
-    clear(guildId: Snowflake, settings?: boolean) { // settings: Are we clearing the settings for the guild too?
+    clear(guildId: Snowflake, settings?: boolean) {
         const guildQueue = this.queueMap.get(guildId)
             if (!guildQueue) return false;
         
@@ -257,14 +263,14 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 guildId: guildId,
                 client: this.client,
                 queue: [],
-                currentTrack: 0,
+                currentTrack: -1,
                 currentResource: undefined,
                 player: guildQueue.player,
-                activeEmbeds: [],
+                activeEmbeds: guildQueue.activeEmbeds,
                 settings: {
-                    trackLoop: false,
-                    queueLoop: false,
-                    shuffle: false,
+                    trackLoop: guildQueue.settings.trackLoop,
+                    queueLoop: guildQueue.settings.queueLoop,
+                    shuffle: guildQueue.settings.shuffle,
                 },
             })
 
@@ -274,14 +280,14 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 guildId: guildId,
                 client: this.client,
                 queue: [],
-                currentTrack: 0,
+                currentTrack: -1,
                 currentResource: undefined,
                 player: guildQueue.player,
-                activeEmbeds: guildQueue.activeEmbeds,
+                activeEmbeds: [],
                 settings: {
-                    trackLoop: guildQueue.settings.trackLoop,
-                    queueLoop: guildQueue.settings.queueLoop,
-                    shuffle: guildQueue.settings.shuffle,
+                    trackLoop: false,
+                    queueLoop: false,
+                    shuffle: false,
                 },
             })
 
@@ -338,22 +344,22 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         if (startingPage > pageCount) return false; // Invalid Page
         if (!startingPage) currentPage = currentTrackPage // Set the page of the current track to be displayed first
 
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder()
             .addComponents([
     
                 // Previous Page Button
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('previousQueuePage')
                     .setEmoji(`⬅️`)
-                    .setStyle('PRIMARY')
+                    .setStyle(ButtonStyle.Primary)
                     .setDisabled(currentPage > 1 ? false : true),
                 
                 // Next Page Button 
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('nextQueuePage')
                     .setEmoji(`➡️`)
-                    .setStyle('PRIMARY')
-                    .setDisabled(((pageCount > 1) && (currentPage < pageCount)) ? false : true)
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(((pageCount > 1) && (currentPage < pageCount)) ? false : true),
                 
             ]);
     
@@ -361,7 +367,7 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
             trackArray: trackArray,
             pageCount: pageCount,
             currentPage: currentPage,
-            messageActionRow: row
+            actionRow: row as any // TS Error?
         }
 
     }
@@ -444,8 +450,24 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         return true;
     }
 
+    async skip(guildId: Snowflake, index: number): Promise<TrackEntry | false | "last"> {
+        const guildQueue = this.queueMap.get(guildId)
+        if (guildQueue) {
+            if (await stateManager.can.play(guildQueue)) {
 
-    async goto(guildId: Snowflake, index: number): Promise<TrackEntry | false> {
+                const queue = guildQueue.queue
+                if (guildQueue.currentTrack == queue.length - 1) { // Skip the last track in the queue
+                    guildQueue.player.stop();
+                    return "last";
+                } else {
+                    return this.goto(guildId, index, true);
+                }
+
+            }
+        }
+    }
+
+    async goto(guildId: Snowflake, index: number, ignoreShuffle?: boolean): Promise<TrackEntry | false> {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
             if (await stateManager.can.play(guildQueue)) {
@@ -453,9 +475,19 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 const queue = guildQueue.queue
                 if (queue[index]) {
 
+                    if (!ignoreShuffle && guildQueue.settings.shuffle) { // Make sure tracks already played in a shuffle don't repeat
+                        const requestedTrack = guildQueue.queue[index]
+                        if (requestedTrack.shufflePlayed) return false;
+                    }
+
                     const trackLoad = await this.loadTrack(guildId, index);
                     if (trackLoad) {
                         mapMutator.changeCurrentTrack(this.queueMap, guildId, index);
+
+                        if (guildQueue.settings.shuffle) { // Make sure this track doesn't play again when the bot is shuffling
+                            mapMutator.setTrackShuffleState(this.queueMap, guildId, index, true);
+                        }
+                        
                     }
                     return trackLoad
                     

@@ -1,5 +1,5 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction, GuildMember } from "discord.js";
+import { Client, ChatInputCommandInteraction, GuildMember } from "discord.js";
 import { config } from "../../modules/config";
 import { getVoiceConnection } from "@discordjs/voice";
 import { basicEmbed, colorPalette } from "../../modules/responses";
@@ -14,7 +14,7 @@ export default class DisconnectCommand extends RFCommand {
         description: "Ask me to disconnect from your channel."
     }
 
-    async callback(interaction: CommandInteraction, config: config) {
+    async callback(interaction: ChatInputCommandInteraction, config: config) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild

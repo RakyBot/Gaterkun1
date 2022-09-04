@@ -53,7 +53,7 @@ export default async function queuePageButtons(interaction: ButtonInteraction, q
         queue.renewQueueEmbed(guild.id, message.id)
         queue.updateEmbed(guild.id, interaction.message.id, calculated.currentPage, calculated.pageCount)
 
-        await interaction.update({ embeds: [queueEmbed], components: [calculated.messageActionRow] }).catch((err) => { throw err; });
+        await interaction.update({ embeds: [queueEmbed], components: [calculated.actionRow] }).catch((err) => { throw err; });
         await interaction.reply({ content: `Went to the previous page!`, ephemeral: true }).catch((err) => { throw err; });
 
 
@@ -63,8 +63,6 @@ export default async function queuePageButtons(interaction: ButtonInteraction, q
 
     // Next Page Button Pressed \\
     } else if (interaction.customId == "nextQueuePage") {
-        console.log("CurrentPage:", currentPage)
-
         const calculated = queue.constructEmbed(guild.id, currentPage + 1)
             if (!calculated) return await interaction.reply({ content: `An error occured moving the page.`, ephemeral: true }).catch((err) => { throw err; });
 
@@ -86,7 +84,7 @@ export default async function queuePageButtons(interaction: ButtonInteraction, q
         queue.renewQueueEmbed(guild.id, message.id)
         queue.updateEmbed(guild.id, interaction.message.id, calculated.currentPage, calculated.pageCount)
 
-        await interaction.update({ embeds: [queueEmbed], components: [calculated.messageActionRow] }).catch((err) => { throw err; });
+        await interaction.update({ embeds: [queueEmbed], components: [calculated.actionRow] }).catch((err) => { throw err; });
 
     }
 

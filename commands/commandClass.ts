@@ -1,5 +1,5 @@
-import { Client, CommandInteraction } from "discord.js";
-import { ApplicationCommandOptionTypes } from "discord.js/typings/enums";
+import { Client, ChatInputCommandInteraction } from "discord.js";
+import { ApplicationCommandOptionType } from "discord.js";
 import { queueMapType } from "../musicHandler/queue";
 
 type slashInfoType = {
@@ -8,7 +8,7 @@ type slashInfoType = {
     options?: {
         name: string,
         description: string,
-        type: string | ApplicationCommandOptionTypes,
+        type: string | ApplicationCommandOptionType,
         required?: boolean
     }[]
 }
@@ -22,7 +22,7 @@ export default class RFCommand {
 
     slashInfo = {} as slashInfoType
     
-    callback(interaction: CommandInteraction, config: any, queueMap: queueMapType) {
+    callback(interaction: ChatInputCommandInteraction, config: any, queueMap: queueMapType) {
 
     }
 }

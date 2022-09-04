@@ -1,5 +1,5 @@
 import RFCommand from "../commandClass";
-import { Client, CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionType, Client, ChatInputCommandInteraction } from "discord.js";
 import { config } from "../../modules/config";
 import Queue, { queueMapType } from "../../musicHandler/queue";
 import { basicEmbed, colorPalette } from "../../modules/responses";
@@ -16,13 +16,13 @@ export default class RemoveCommand extends RFCommand {
             {
                 name: "position",
                 description: "The position in the queue of the track to remove",
-                type: "INTEGER",
+                type: ApplicationCommandOptionType.Integer,
                 required: true
             }
         ],
     }
 
-    async callback(interaction: CommandInteraction, config: config, queueMap: queueMapType) {
+    async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
         return new Promise(async (res, rej) => {
 
             const guild = interaction.guild
@@ -36,7 +36,6 @@ export default class RemoveCommand extends RFCommand {
             } else {
                 return interaction.editReply({ embeds: [ basicEmbed( `🛑｜There is no track at ${"`"}${position + 1}${"`"}. Please select a number ${"`"}1${"`"} - ${"`"}${guildQueue.queue.length}${"`"}.`, colorPalette.error ) ] })
             }
-            return await interaction.editReply(result ? "Removed track." : "Could not remove track.").catch(err => {})
 
         })
     }

@@ -1,4 +1,4 @@
-import { Client, Intents, Snowflake } from 'discord.js'
+import { Client, GatewayIntentBits, Snowflake } from 'discord.js'
 import * as dotenv from 'dotenv'
     dotenv.config()
 import CommandHandler from './modules/commandHandler'
@@ -8,7 +8,7 @@ import queuePageButtons from './modules/queuePages'
 import PrivateVC from './modules/privateVC'
 
 
-const client = new Client({ intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILDS] })
+const client = new Client({ intents: [GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.Guilds] })
 
 
 client.on('ready', async () => {
@@ -16,13 +16,16 @@ client.on('ready', async () => {
     console.log(`Logged in as ${client.user.username}!`);
 
     const queueMap: Map<Snowflake, QueueEntry> = new Map()
-    const queue = await new Queue(client, undefined).init(queueMap);
-    const loadMananger = await loadManager.checkLoop(client, new Queue(client, queueMap));
 
+    // Initialize Modules
+    await new Queue(client, undefined).init(queueMap);
+    await loadManager.checkLoop(client, new Queue(client, queueMap));
     await new CommandHandler(client).init();
+
+
     
     client.on('interactionCreate', interaction => {
-        if (interaction.isCommand() && interaction.inGuild()) {
+        if (interaction.isChatInputCommand() && interaction.inGuild()) {
 
             new CommandHandler(client).handler(interaction, queueMap);
 
@@ -52,4 +55,4 @@ client.on('ready', async () => {
 
 })
 
-client.login(process.env.TOKEN)
+client.login(process.env.TOKEN);

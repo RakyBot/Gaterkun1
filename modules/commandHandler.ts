@@ -1,4 +1,4 @@
-import { Client, CommandInteraction, GuildMember } from "discord.js";
+import { Client, ChatInputCommandInteraction, GuildMember } from "discord.js";
 import commands from '../commands'
 import { queueMapType } from "../musicHandler/queue";
 import Config, {config as configOutline} from "./config";
@@ -17,7 +17,6 @@ export default class CommandHandler {
             for (const commandClass of commands) {
                 const slashInfo = new commandClass(this.client).slashInfo
                 slashCommandsSetData.push(slashInfo)
-                console.log(slashInfo)
             }
 
             // Send Commands to Discord
@@ -31,7 +30,7 @@ export default class CommandHandler {
         })
     }
 
-    async handler(interaction: CommandInteraction, queueMap: queueMapType) {
+    async handler(interaction: ChatInputCommandInteraction, queueMap: queueMapType) {
         return new Promise(async (resolve, reject) => {
 
             await interaction.deferReply({ ephemeral: false }).catch(() => {}) // Hold it until we can resolve whatever command needs to be processed.

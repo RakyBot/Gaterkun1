@@ -1,4 +1,4 @@
-import { CategoryChannel, Client, VoiceState, Permissions, VoiceChannel } from "discord.js";
+import { CategoryChannel, Client, VoiceState, PermissionFlagsBits, VoiceChannel, Guild, ChannelType } from "discord.js";
 import Config, { config } from "./config";
 
 export default class PrivateVC {
@@ -12,18 +12,23 @@ export default class PrivateVC {
         this.newVoiceState = newVoiceState
     }
 
-    async createVC(config: config) { // create function
+    async createVC(config: config, guild: Guild) { // create function
         return new Promise(async (res, rej) => {
-            const createCategory = await this.client.channels.fetch(config.vcCategory) as CategoryChannel;
-            const newVC = await createCategory.createChannel(this.newVoiceState.member.user.username, {
-                type: "GUILD_VOICE",
+            const newVC = await guild.channels.create({
+                name: this.newVoiceState.member.user.username,
+                type: ChannelType.GuildVoice,
                 permissionOverwrites: [
                     {
                         id: this.newVoiceState.member.id,
-                        allow: [ Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES ] // Let the VC owner manage the channel and edit roles for the channel
+                        allow: [ PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles ] // Let the VC owner manage the channel and edit roles for the channel
+                    },
+                    {
+                        id: this.newVoiceState.guild.id,
+                        allow: [ PermissionFlagsBits.ViewChannel ] // Let everyone access the channel.
                     }
                 ]
             }).catch((err) => { throw err; });
+            newVC.setParent(config.vcCategory);
 
             await this.newVoiceState.setChannel(newVC).catch((err) => { return; });
             return res(newVC);
@@ -38,7 +43,7 @@ export default class PrivateVC {
             if (config && config.privateVC) {
                 if (this.newVoiceState.channelId == config.createVC) { // Joined VC Create Channel
 
-                    await this.createVC(config).catch((err) => {});
+                    await this.createVC(config, guild).catch((err) => {});
 
                 }
                 
