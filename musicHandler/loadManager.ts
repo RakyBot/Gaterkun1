@@ -1,5 +1,5 @@
 import { Client, Snowflake } from "discord.js"
-import { AudioPlayerStatus, getVoiceConnection } from "@discordjs/voice"
+import { AudioPlayerStatus, getVoiceConnection, VoiceConnectionStatus } from "@discordjs/voice"
 import Queue, { QueueEntry } from "./queue"
 
 // Reference States
@@ -97,6 +97,7 @@ function listeners(client: Client, Queue: Queue, guildId: Snowflake) {
             Queue.clear(guildId, true)
             try {
                 getVoiceConnection(guildId).destroy();
+                Queue.clear(guildId); // Clear the queue on timeout
             } catch(e) {
                 console.warn(`Could not find the bot connection for guild ${guildId}`)
             }
@@ -111,6 +112,7 @@ function listeners(client: Client, Queue: Queue, guildId: Snowflake) {
         clearTimeout(timer);
         return;
     })
+
 }
 
 ///////////////////////////////////////////////////////////

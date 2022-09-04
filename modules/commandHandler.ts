@@ -1,5 +1,6 @@
 import { Client, ChatInputCommandInteraction, GuildMember } from "discord.js";
 import commands from '../commands'
+import mapMutator from "../musicHandler/mapMutator";
 import { queueMapType } from "../musicHandler/queue";
 import Config, {config as configOutline} from "./config";
 
@@ -45,6 +46,7 @@ export default class CommandHandler {
                     let commandName = RFCommand.slashInfo.name
 
                 if (interactionCommandName == commandName) {
+                    mapMutator.setSongUpdateChannel(queueMap, interaction.guildId, interaction.channelId);
                     await RFCommand.callback(interaction, config, queueMap).catch((err) => { throw err; })
                     return resolve(true);
                 } else {

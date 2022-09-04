@@ -29,7 +29,7 @@ export default class GotoCommand extends RFCommand {
             const guild = interaction.guild
             const position = interaction.options.getInteger('position') - 1
             
-            const result = await new Queue(interaction.client, queueMap).goto(guild.id, position, true)
+            const result = await new Queue(interaction.client, queueMap).goto(guild.id, position, true, true)
 
             if (result) {
                 return interaction.editReply({ embeds: [ basicEmbed( `⏭️｜Went to track ${"`"}${position + 1}${"`"}.\n🔊｜Now playing: [${result.title}](${result.source}) by ${"`"}${result.author}${"`"}.`, colorPalette.trackOperation ) ] })

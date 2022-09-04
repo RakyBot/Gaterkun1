@@ -1,6 +1,7 @@
 import { AudioPlayer, createAudioPlayer, NoSubscriberBehavior, createAudioResource, getVoiceConnection, AudioPlayerStatus, AudioResource } from "@discordjs/voice";
-import { Client, ActionRowBuilder, ButtonBuilder, Snowflake, ButtonStyle, APIActionRowComponent } from "discord.js";
+import { Client, ActionRowBuilder, ButtonBuilder, Snowflake, ButtonStyle, APIActionRowComponent, TextChannel } from "discord.js";
 import play from 'play-dl'
+import { basicEmbed, colorPalette } from "../modules/responses";
 import { loader } from "./loadManager";
 import mapMutator from "./mapMutator";
 import queryFilter from "./queryFilter";
@@ -35,6 +36,7 @@ export type QueueEntry = {
     },
     player: AudioPlayer,
     activeEmbeds: activeEmbed[],
+    songUpdateChannel: Snowflake,
     settings: {
         trackLoop: boolean,
         queueLoop: boolean,
@@ -69,32 +71,8 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         this.queueMap = queueMap
     }
 
-    async init(queueMap: queueMapType) { // Run on start
-        for (const [index, guild] of Array.from(this.client.guilds.cache.entries())) { // Initialize the queues
-            queueMap.set(guild.id, {
-                guildId: guild.id,
-                client: this.client,
-                queue: [],
-                currentTrack: -1,
-                currentResource: undefined,
-                player: createAudioPlayer({
-                    behaviors: {
-                        noSubscriber: NoSubscriberBehavior.Pause, // Pause if there is no active connection
-                    }
-                }),
-                activeEmbeds: [],
-                settings: {
-                    trackLoop: false,
-                    queueLoop: false,
-                    shuffle: false,
-                },
-            })
-        }
-
-        return true;
-    }
-    async initGuild(guildId: Snowflake) {
-        this.queueMap.set(guildId, {
+    getDefaultGuildEntry(guildId: Snowflake, settings?: { trackLoop: boolean, queueLoop: boolean, shuffle: boolean, }) {
+        let entry = {
             guildId: guildId,
             client: this.client,
             queue: [],
@@ -106,12 +84,28 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 }
             }),
             activeEmbeds: [],
+            songUpdateChannel: "",
             settings: {
                 trackLoop: false,
                 queueLoop: false,
                 shuffle: false,
             },
-        })
+        } as QueueEntry
+    
+        if (settings) entry.settings = settings
+    
+        return entry
+    }
+
+    async init(queueMap: queueMapType) { // Run on start
+        for (const [index, guild] of Array.from(this.client.guilds.cache.entries())) { // Initialize the queues
+            queueMap.set(guild.id, this.getDefaultGuildEntry(guild.id))
+        }
+
+        return true;
+    }
+    async initGuild(guildId: Snowflake) {
+        this.queueMap.set(guildId, this.getDefaultGuildEntry(guildId))
 
         return true;
     }
@@ -259,37 +253,15 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
         
         if (settings) {
 
-            this.queueMap.set(guildId, {
-                guildId: guildId,
-                client: this.client,
-                queue: [],
-                currentTrack: -1,
-                currentResource: undefined,
-                player: guildQueue.player,
-                activeEmbeds: guildQueue.activeEmbeds,
-                settings: {
-                    trackLoop: guildQueue.settings.trackLoop,
-                    queueLoop: guildQueue.settings.queueLoop,
-                    shuffle: guildQueue.settings.shuffle,
-                },
-            })
+            this.queueMap.set(guildId, this.getDefaultGuildEntry(guildId, {
+                trackLoop: guildQueue.settings.trackLoop,
+                queueLoop: guildQueue.settings.queueLoop,
+                shuffle: guildQueue.settings.shuffle,
+            }))
 
         } else {
 
-            this.queueMap.set(guildId, {
-                guildId: guildId,
-                client: this.client,
-                queue: [],
-                currentTrack: -1,
-                currentResource: undefined,
-                player: guildQueue.player,
-                activeEmbeds: [],
-                settings: {
-                    trackLoop: false,
-                    queueLoop: false,
-                    shuffle: false,
-                },
-            })
+            this.queueMap.set(guildId, this.getDefaultGuildEntry(guildId))
 
         }
 
@@ -460,14 +432,14 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                     guildQueue.player.stop();
                     return "last";
                 } else {
-                    return this.goto(guildId, index, true);
+                    return this.goto(guildId, index, true, true);
                 }
 
             }
         }
     }
 
-    async goto(guildId: Snowflake, index: number, ignoreShuffle?: boolean): Promise<TrackEntry | false> {
+    async goto(guildId: Snowflake, index: number, ignoreShuffle?: boolean, noChannelUpdate?: boolean): Promise<TrackEntry | false> {
         const guildQueue = this.queueMap.get(guildId)
         if (guildQueue) {
             if (await stateManager.can.play(guildQueue)) {
@@ -487,8 +459,14 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                         if (guildQueue.settings.shuffle) { // Make sure this track doesn't play again when the bot is shuffling
                             mapMutator.setTrackShuffleState(this.queueMap, guildId, index, true);
                         }
+
+                        const songUpdateChannel = await this.client.channels.fetch(guildQueue.songUpdateChannel).catch((err) => {console.warn(err)}) as TextChannel
+                        if (songUpdateChannel && !noChannelUpdate) await songUpdateChannel.send({ embeds: [ basicEmbed(`🔊｜Now playing: [${trackLoad.title}](${trackLoad.source}) by ${"`"}${trackLoad.author}${"`"}`, colorPalette.trackOperation) ] }).catch((err) => {console.warn(err)});
                         
                     }
+
+
+
                     return trackLoad
                     
                 } else {
