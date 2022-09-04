@@ -75,9 +75,14 @@ typings/
 # FuseBox cache
 .fusebox/
 
+
+
 # Cookies/Tokens
 .data/youtube.data
 
 # TypeScript Compiler
 dist/
-note.md
+
+# Config Files
+config/
+!/config/example.json
