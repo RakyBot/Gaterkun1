@@ -28,7 +28,7 @@ export default class PrivateVC {
                     }
                 ]
             }).catch((err) => { throw err; });
-            newVC.setParent(config.vcCategory);
+            newVC.setParent(config.vcCategory, { lockPermissions: false });
 
             await this.newVoiceState.setChannel(newVC).catch((err) => { return; });
             return res(newVC);
