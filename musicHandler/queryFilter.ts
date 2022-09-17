@@ -1,5 +1,3 @@
-// BREAKING: Filter out age-restricted videos at all costs. //////////////////////////////////////////////////////
-
 // Filter through different types of links (YouTube Video, YouTube Playlist, Privated/Age-Restricted Videos (crasher), Spotify Link (query dissassembly), etc.)
 
 // Returns the YouTube Link (or array of links if it's a playlist)
@@ -84,12 +82,12 @@ export default {
                     if (resource) {
                         return [
                             {
-                            title: track.name,
-                            author: artists,
-                            duration: resource[0].duration.totalSeconds,
-                            sourceType: "YOUTUBE",
-                            source: `https://youtube.com/watch?v=${resource[0].youtubeId}`,
-                            shufflePlayed: false,
+                                title: track.name,
+                                author: artists,
+                                duration: resource[0].duration.totalSeconds,
+                                sourceType: "YOUTUBE",
+                                source: `https://youtube.com/watch?v=${resource[0].youtubeId}`,
+                                shufflePlayed: false,
                             }
                         ]
                     }
