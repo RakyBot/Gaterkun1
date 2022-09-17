@@ -14,6 +14,7 @@ import fastforward from './Music/fastForward'
 import rewind from './Music/rewind'
 import settime from './Music/settime'
 import shuffle from './Music/shuffle'
+import debug from './Music/debug'
 
 export default [
     connect,
@@ -32,4 +33,5 @@ export default [
     rewind,
     settime,
     shuffle,
+    debug,
 ]
