@@ -4,7 +4,8 @@ const configsPath = './configs'
 export type config = {
     vcCategory: string,
     createVC: string,
-    privateVC: boolean
+    privateVC: boolean,
+    allowMassPingVCChannel: boolean,
 }
 
 export default class Config {
@@ -14,7 +15,7 @@ export default class Config {
         this.guildId = guildId
     }
     
-    async get() {
+    async get(): Promise<config> {
         return new Promise(async (res, rej) => {
             const files = await fs.readdir(configsPath).catch((err) => { throw err; })
             let found = false

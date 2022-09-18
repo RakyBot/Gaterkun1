@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Snowflake } from 'discord.js'
+import { ChannelType, Client, GatewayIntentBits, PermissionsBitField, Snowflake } from 'discord.js'
 import * as dotenv from 'dotenv'
     dotenv.config()
 import CommandHandler from './modules/commandHandler'
@@ -6,9 +6,10 @@ import Queue, { QueueEntry } from './musicHandler/queue'
 import loadManager from './musicHandler/loadManager'
 import queuePageButtons from './modules/queuePages'
 import PrivateVC from './modules/privateVC'
+import Config from './modules/config'
 
 
-const client = new Client({ intents: [GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.Guilds] })
+const client = new Client({ intents: [GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMembers] })
 
 
 client.on('ready', async () => {
@@ -51,6 +52,58 @@ client.on('ready', async () => {
 
     client.on('voiceStateUpdate', async (oldState, newState) => {
         new PrivateVC(client, oldState, newState).update().catch((err) => { return; });
+    })
+
+    client.on('channelUpdate', async (oldChannel, newChannel) => {
+
+        if (oldChannel.type == ChannelType.GuildVoice && newChannel.type == ChannelType.GuildVoice) {
+            const guildId = newChannel.guildId
+            const config = await new Config(guildId).get().catch((err) => { throw(err); })
+
+            if (config.allowMassPingVCChannel) return; // Don't block mass ping permissions if the config allows it.
+
+            if (newChannel.parentId == config.vcCategory) {
+
+                if (newChannel.permissionOverwrites != oldChannel.permissionOverwrites) {
+
+                    let newPermissionsPayload = []
+
+                    for (const [Id, permissions] of newChannel.permissionOverwrites.cache.entries()) {
+                        const allowBitPermissions = new PermissionsBitField(permissions.allow);
+                        const denyBitPermissions = new PermissionsBitField(permissions.deny);
+
+                        let payload = {
+                            id: Id,
+                            allow: allowBitPermissions,
+                            deny: denyBitPermissions,
+                            skip: undefined,
+                        }
+
+                        if (!allowBitPermissions.has("MentionEveryone") && denyBitPermissions.has("MentionEveryone")) payload.skip = true;
+        
+                        allowBitPermissions.remove("MentionEveryone")
+                        denyBitPermissions.add("MentionEveryone")
+
+                        console.debug("USER PAYLOAD: ", payload)
+
+                        newPermissionsPayload.push(payload)
+        
+                    }
+        
+                    let skipCounter = 0
+                    for (const entry of newPermissionsPayload) {
+                        if (entry.skip) skipCounter++
+                    }
+
+                    if (skipCounter == newPermissionsPayload.length) return; // Prevent Infinite Loops
+                    await newChannel.permissionOverwrites.set(newPermissionsPayload).catch((err) => { console.error(err); return; })
+
+                }
+
+            }
+
+        }
+
     })
 
 })
