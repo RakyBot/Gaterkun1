@@ -84,8 +84,6 @@ client.on('ready', async () => {
                         allowBitPermissions.remove("MentionEveryone")
                         denyBitPermissions.add("MentionEveryone")
 
-                        console.debug("USER PAYLOAD: ", payload)
-
                         newPermissionsPayload.push(payload)
         
                     }
