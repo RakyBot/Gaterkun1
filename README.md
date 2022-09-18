@@ -29,6 +29,7 @@ The structure of a guild configuration file looks as the following:
     "vcCategory": "776906203745878016", // This is a category id for where temporary Voice Channels should be held.
     "createVC": "777210472184545322", // This is a channel id for the channel where users should join to create their own temporary Voice Channel.
     "privateVC": true // This is a boolean enabling the private VC feature. If this is set to false, the above is ignored.
+    "allowMassPingVCChannel": false, // This is a boolean that will either enable or disable a check for an exploit that allows users to mass ping within a voice channel's chat.
 }
 ```
 ---
