@@ -485,12 +485,8 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
             if (stateManager.can.add(guildQueue)) {
 
                 let passedTime = 0
-                if (guildQueue.currentResource && guildQueue.currentResource.resource) {
-                    if (time) {
-                        passedTime = time
-                    } else {
-                        passedTime = Math.floor(guildQueue.currentResource.resource.playbackDuration / 1000)
-                    }
+                if (time) {
+                    passedTime = time
                 }
                 
                 const resource = await createResource(guildQueue.queue[position], time).catch((err) => {
