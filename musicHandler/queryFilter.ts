@@ -19,6 +19,7 @@ const { getTracks } = require('spotify-url-info')(unfetch) // https://github.com
 
 const discordCDN = /(https?:\/\/)?(www.)?(cdn.discordapp.com\/attachments)\/(.+[0-9])\/(.+[0-9])\/(.+[a-z][0-9])/
 const spotifyLink = /(https?:\/\/)?(www.)?(open.spotify.com\/(track|playlist))\/.+/
+const youtubeShorts = /(https?:\/\/)?(www.)?(youtube.com\/shorts\/(.+))/
 
 export default {
     async getEntry(query: string): Promise<TrackEntry[] | false> {
@@ -80,7 +81,15 @@ export default {
 
                     const resource = await ytMusic.searchMusics(`${track.name} ${artists}`)
                     if (resource) {
-                        return [
+                        console.debug({
+                            title: track.name,
+                            author: artists,
+                            duration: resource[0].duration.totalSeconds,
+                            sourceType: "YOUTUBE",
+                            source: `https://youtube.com/watch?v=${resource[0].youtubeId}`,
+                            shufflePlayed: false,
+                        })
+                        return [ // DEBUG: Check this for null values
                             {
                                 title: track.name,
                                 author: artists,
@@ -101,6 +110,8 @@ export default {
             let links: TrackEntry[] = []
             for (const track of tracks) {
 
+                if (track.url.match(youtubeShorts)) continue; // Block YouTube Shorts
+
                 links.push({
                     title: track.title,
                     author: track.author.name,
@@ -114,7 +125,7 @@ export default {
 
             return links;
 
-        } else if (ytdl.validateURL(query)) { // YouTube Direct Link
+        } else if (ytdl.validateURL(query) && !query.match(youtubeShorts)) { // YouTube Direct Link
             const track = await play.video_info(query)
             return [
                 {
