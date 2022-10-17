@@ -26,7 +26,6 @@ export default {
 
         const playlistID = await ytpl.getPlaylistID(query).catch((err) => {})
 
-        // Insert Regexs here to decide if it's a link or search request
         if (query.match(discordCDN)) { // Discord
             
             return [
@@ -81,15 +80,7 @@ export default {
 
                     const resource = await ytMusic.searchMusics(`${track.name} ${artists}`)
                     if (resource) {
-                        console.debug({
-                            title: track.name,
-                            author: artists,
-                            duration: resource[0].duration.totalSeconds,
-                            sourceType: "YOUTUBE",
-                            source: `https://youtube.com/watch?v=${resource[0].youtubeId}`,
-                            shufflePlayed: false,
-                        })
-                        return [ // DEBUG: Check this for null values
+                        return [
                             {
                                 title: track.name,
                                 author: artists,

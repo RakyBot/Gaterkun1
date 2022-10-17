@@ -1,4 +1,4 @@
-import { AudioResource } from "@discordjs/voice";
+import { AudioPlayer, AudioResource } from "@discordjs/voice";
 import { Snowflake } from "discord.js";
 import { queueMapType, TrackEntry } from "./queue";
 
@@ -118,6 +118,18 @@ export default { // NOTE: This module expects zero-based indexes
             if (!guildQueue) return false;
     
         guildQueue.songUpdateChannel = channelId;
+        
+        queueMap.set(guildId, guildQueue)
+        return true;
+
+    },
+
+    setPlayer(queueMap: queueMapType, guildId: Snowflake, player: AudioPlayer) {
+
+        const guildQueue = queueMap.get(guildId)
+            if (!guildQueue) return false;
+
+        guildQueue.player = player;
         
         queueMap.set(guildId, guildQueue)
         return true;
