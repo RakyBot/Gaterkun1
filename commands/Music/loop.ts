@@ -13,16 +13,16 @@ export default class LoopCommand extends RFCommand {
 
     slashInfo = {
         name: 'loop',
-        description: "Loop the music bot.",
+        description: "📚 Bucle el bot de música.",
         options: [
             {
                 name: "track",
-                description: "Toggle the track loop.",
+                description: "Alternar el bucle de pista.",
                 type: ApplicationCommandOptionType.Subcommand,
             },
             {
                 name: "queue",
-                description: "Toggle the queue loop.",
+                description: "Alternar el bucle de cola.",
                 type: ApplicationCommandOptionType.Subcommand,
             }
         ]
@@ -43,12 +43,12 @@ export default class LoopCommand extends RFCommand {
                 if (looped) {
 
                     mapMutator.setLoop(queueMap, guild.id, "TRACK", false)
-                    return res(await interaction.editReply({ embeds: [ basicEmbed( `🟦｜Stopped looping the current track.`, colorPalette.trackOperation ) ] }).catch((err) => { throw err; }));
+                    return res(await interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013164139625062512> Se detuvo el bucle de la pista actual.`, colorPalette.trackOperation ) ] }).catch((err) => { throw err; }));
 
                 } else {
 
                     mapMutator.setLoop(queueMap, guild.id, "TRACK", true)
-                    return res(await interaction.editReply({ embeds: [ basicEmbed( `🔂｜Looping the current track.`, colorPalette.trackOperation ) ] }).catch((err) => { throw err; }));
+                    return res(await interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013896171409907783> Bucle de la pista actual.`, colorPalette.trackOperation ) ] }).catch((err) => { throw err; }));
 
                 }
 
@@ -59,12 +59,12 @@ export default class LoopCommand extends RFCommand {
                 if (looped) {
 
                     mapMutator.setLoop(queueMap, guild.id, "QUEUE", false)
-                    return res(await interaction.editReply({ embeds: [ basicEmbed( `🟦｜Stopped looping the queue.`, colorPalette.trackOperation ) ] }).catch((err) => { throw err; }));
+                    return res(await interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013164139625062512> Dejó de hacer un bucle en la cola.`, colorPalette.trackOperation ) ] }).catch((err) => { throw err; }));
 
                 } else {
 
                     mapMutator.setLoop(queueMap, guild.id, "QUEUE", true)
-                    return res(await interaction.editReply({ embeds: [ basicEmbed( `🔁｜Looping the queue.`, colorPalette.trackOperation ) ] }).catch((err) => { throw err; }));
+                    return res(await interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013165735431901276> Reponiendo la cola.`, colorPalette.trackOperation ) ] }).catch((err) => { throw err; }));
 
                 }
 
