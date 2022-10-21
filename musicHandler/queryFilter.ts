@@ -15,10 +15,8 @@ import { getVideoDurationInSeconds } from 'get-video-duration'
 
 // Spotify
 import * as unfetch from "isomorphic-unfetch"
-const { getTracks } = require('spotify-url-info')(unfetch) // https://github.com/microlinkhq/spotify-url-info
 
 const discordCDN = /(https?:\/\/)?(www.)?(cdn.discordapp.com\/attachments)\/(.+[0-9])\/(.+[0-9])\/(.+[a-z][0-9])/
-const spotifyLink = /(https?:\/\/)?(www.)?(open.spotify.com\/(track|playlist))\/.+/
 const youtubeShorts = /(https?:\/\/)?(www.)?(youtube.com\/shorts\/(.+))/
 
 export default {
