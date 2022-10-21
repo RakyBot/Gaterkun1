@@ -11,7 +11,7 @@ export default class DisconnectCommand extends RFCommand {
 
     slashInfo = {
         name: 'disconnect',
-        description: "Ask me to disconnect from your channel."
+        description: "💡 Pídeme que me desconecte de tu canal."
     }
 
     async callback(interaction: ChatInputCommandInteraction, config: config) {
@@ -30,11 +30,11 @@ export default class DisconnectCommand extends RFCommand {
 
             } else {
 
-                return res(interaction.editReply("Please join my voice channel to use this feature!"))
+                return res(interaction.editReply("¡Únete a mi canal de voz para usar esta función!"))
 
             }
             
-            return interaction.editReply({ embeds: [ basicEmbed( `🚪｜Disconnected.`, colorPalette.trackOperation ) ] })
+            return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013164546455769168> Desconectado.`, colorPalette.trackOperation ) ] })
 
 
         })
