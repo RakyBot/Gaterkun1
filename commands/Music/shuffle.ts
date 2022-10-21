@@ -32,12 +32,12 @@ export default class ShuffleCommand extends RFCommand {
                     mapMutator.setTrackShuffleState(queueMap, guild.id, index, false); // reset the shuffle state of all songs.
                 }
 
-                return interaction.editReply({ embeds: [ basicEmbed( `🔀｜Stopped shuffling the queue.`, colorPalette.trackOperation ) ] });
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013166313583161351> Dejo de barejar la cola.`, colorPalette.trackOperation ) ] });
 
             } else {
 
                 const result = mapMutator.setShuffle(queueMap, guild.id, true);
-                return interaction.editReply({ embeds: [ basicEmbed( `🔀｜Shuffled the queue.`, colorPalette.trackOperation ) ] });
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013182506461302885> Barejo la lista.`, colorPalette.trackOperation ) ] });
 
             }
 
