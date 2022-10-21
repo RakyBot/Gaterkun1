@@ -21,9 +21,9 @@ export default class ClearCommand extends RFCommand {
             const result = new Queue(this.client, queueMap).clear(interaction.guildId)
 
             if (result) {
-                return interaction.editReply({ embeds: [ basicEmbed( `🗑️｜Cleared the queue.`, colorPalette.trackOperation ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013166313583161351> Borró la cola.`, colorPalette.trackOperation ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜Error clearing the queue.`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013162318764449883> Error al borrar la cola.`, colorPalette.error ) ] })
             }
 
         })
