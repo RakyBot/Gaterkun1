@@ -11,7 +11,7 @@ export default class ResumeCommand extends RFCommand {
 
     slashInfo = {
         name: 'resume',
-        description: "Resumes the music bot.",
+        description: "🎹 Quitrar pause del bot de música.",
     }
 
     async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
@@ -21,9 +21,9 @@ export default class ResumeCommand extends RFCommand {
             const result = await new Queue(interaction.client, queueMap).resume(guild.id)
 
             if (result) {
-                return interaction.editReply({ embeds: [ basicEmbed( `▶️｜Resumed.`, colorPalette.trackOperation ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013160472415047710> Volver a poner.`, colorPalette.trackOperation ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜The queue is not paused.`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:aa:1013165735431901276> La musica no está en pausa.`, colorPalette.error ) ] })
             }
 
         })
