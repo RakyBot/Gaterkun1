@@ -130,9 +130,9 @@ export default class Queue { // NOTE: Each module is expected to do its own safe
                 }
                 
                 if (count > 1) {
-                    return `📄｜Queued ${count} tracks.`;
+                    return `<:XDD:ID> ｜ $ {count} pistas en cola.`;
                 } else {
-                    return `📄｜Queued [${entries[0].title}](${entries[0].source}) by ${"`"}${entries[0].author}${"`"}.`
+                    return `📄｜En la lista [${entries[0].title}](${entries[0].source}) by ${"`"}${entries[0].author}${"`"}.`
                 }
                 
 
