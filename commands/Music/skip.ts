@@ -11,7 +11,7 @@ export default class SkipCommand extends RFCommand {
 
     slashInfo = {
         name: 'skip',
-        description: "Skip the current track.",
+        description: "🎧 Salta la cancion actual.",
     }
 
     async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
@@ -19,16 +19,16 @@ export default class SkipCommand extends RFCommand {
 
             const guild = interaction.guild
             const guildQueue = queueMap.get(guild.id)
-                if (!guildQueue) return await interaction.editReply("🛑｜There was an error skipping the track.").catch(err => {})
+                if (!guildQueue) return await interaction.editReply("<:axdd:1013162318764449883> Hubo un error al saltar la cancion.").catch(err => {})
             
             const result = await new Queue(interaction.client, queueMap).skip(guild.id, guildQueue.currentTrack + 1)
 
             if (result == "last") {
-                return interaction.editReply({ embeds: [ basicEmbed( `⏭️｜Skipped the current track.`, colorPalette.trackOperation ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdd:1013896171409907783> Se saltó la cancion actual.`, colorPalette.trackOperation ) ] })
             } else if (result) {
-                return interaction.editReply({ embeds: [ basicEmbed( `🔊｜Now playing: [${result.title}](${result.source}) by ${"`"}${result.author}${"`"}`, colorPalette.trackOperation ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013161845873442877> Poniendo ahora: [${result.title}](${result.source}) por ${"`"}${result.author}${"`"}`, colorPalette.trackOperation ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜There was an error skipping the track.`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013162318764449883> Hubo un error al saltar la cancion.`, colorPalette.error ) ] })
             }
 
         })
