@@ -12,11 +12,11 @@ export default class GotoCommand extends RFCommand {
 
     slashInfo = {
         name: 'goto',
-        description: "Go to a track in the queue.",
+        description: "🔑 Ir a una pista en la cola.",
         options: [
             {
                 name: "position",
-                description: "The position in the queue of the track to go to.",
+                description: "La posición en la cola de la pista a la que se va a ir.",
                 type: ApplicationCommandOptionType.Integer,
                 required: true
             },
@@ -32,9 +32,9 @@ export default class GotoCommand extends RFCommand {
             const result = await new Queue(interaction.client, queueMap).goto(guild.id, position, true, true)
 
             if (result) {
-                return interaction.editReply({ embeds: [ basicEmbed( `⏭️｜Went to track ${"`"}${position + 1}${"`"}.\n🔊｜Now playing: [${result.title}](${result.source}) by ${"`"}${result.author}${"`"}.`, colorPalette.trackOperation ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013896171409907783> Fue a la pista ${"`"}${position + 1}${"`"}.\n<:xdda:1013161845873442877>｜Poniendo ahora: [${result.title}](${result.source}) by ${"`"}${result.author}${"`"}.`, colorPalette.trackOperation ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜Unable to go to that track.`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xxdda:1013162318764449883> No se puede ir a esa pista.`, colorPalette.error ) ] })
             }
             
 
