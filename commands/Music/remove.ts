@@ -11,11 +11,11 @@ export default class RemoveCommand extends RFCommand {
 
     slashInfo = {
         name: 'remove',
-        description: "Remove a track from the queue.",
+        description: "🔉 Eliminar una pista de la lista de musica.",
         options: [
             {
                 name: "position",
-                description: "The position in the queue of the track to remove",
+                description: "La posición en la cola de la pista a eliminar",
                 type: ApplicationCommandOptionType.Integer,
                 required: true
             }
@@ -32,9 +32,9 @@ export default class RemoveCommand extends RFCommand {
             const result = await new Queue(interaction.client, queueMap).remove(interaction.guildId, position)
 
             if (result) {
-                return interaction.editReply({ embeds: [ basicEmbed( `🗑️｜Removed [${result.title}](${result.source}) by ${"`"}${result.author}${"`"}`, colorPalette.trackOperation ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xda:1013166313583161351> Eliminado [${result.title}](${result.source}) by ${"`"}${result.author}${"`"}`, colorPalette.trackOperation ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜There is no track at ${"`"}${position + 1}${"`"}. Please select a number ${"`"}1${"`"} - ${"`"}${guildQueue.queue.length}${"`"}.`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013165202944032859> No hay lista de musica en ${"`"}${position + 1}${"`"}. Please select a number ${"`"}1${"`"} - ${"`"}${guildQueue.queue.length}${"`"}.`, colorPalette.error ) ] })
             }
 
         })
