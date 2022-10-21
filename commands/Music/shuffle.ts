@@ -12,7 +12,7 @@ export default class ShuffleCommand extends RFCommand {
 
     slashInfo = {
         name: 'shuffle',
-        description: "Shuffles the queue.",
+        description: "🔊 Baraja la lista de canciones.",
     }
 
     async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
