@@ -11,11 +11,11 @@ export default class ConnectCommand extends RFCommand {
 
     slashInfo = {
         name: 'connect',
-        description: "Ask me to connect to your channel.",
+        description: "Pídeme que me conecte a tu canal.",
         options: [
             {
                 name: "channel",
-                description: "Choose a different channel for me to connect to.",
+                description: "Elija un canal diferente para que me conecte.",
                 type: ApplicationCommandOptionType.Channel,
                 required: false
             },
@@ -40,7 +40,7 @@ export default class ConnectCommand extends RFCommand {
 
             } else {
 
-                return res(interaction.editReply("Please join a voice channel to use this feature!"))
+                return res(interaction.editReply("¡Únase a un canal de voz para usar esta función!"))
 
             }
              
@@ -52,7 +52,7 @@ export default class ConnectCommand extends RFCommand {
             })
 
 
-            return res(interaction.editReply({ embeds: [ basicEmbed( `🚪｜Joined <#${voiceChannel.id}>.`, colorPalette.trackOperation ) ] }))
+            return res(interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013160472415047710> Unido <#${voiceChannel.id}>.`, colorPalette.trackOperation ) ] }))
 
         })
     }
