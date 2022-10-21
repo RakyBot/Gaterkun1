@@ -11,17 +11,17 @@ export default class MoveCommand extends RFCommand {
 
     slashInfo = {
         name: 'move',
-        description: "Move a track from one position in the queue to another.",
+        description: "🔋 Mover una pista de una posición en la cola a otra.",
         options: [
             {
                 name: "track",
-                description: "The position in the queue of the track to move.",
+                description: "La posición en la cola de la pista a mover.",
                 type: ApplicationCommandOptionType.Integer,
                 required: true
             },
             {
                 name: "new_position",
-                description: "The new position in the queue to move the track to.",
+                description: "La nueva posición en la cola para mover la pista.",
                 type: ApplicationCommandOptionType.Integer,
                 required: true
             },
@@ -38,9 +38,9 @@ export default class MoveCommand extends RFCommand {
             const result = await new Queue(interaction.client, queueMap).move(guild.id, oldIndex, newIndex)
 
             if (result) {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛒｜Moved [${result.title}](${result.source}) by ${"`"}${result.author}${"`"} to position ${"`"}${newIndex + 1}${"`"}.`, colorPalette.success ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013896171409907783> Movido [${result.title}](${result.source}) por ${"`"}${result.author}${"`"} en posicion ${"`"}${newIndex + 1}${"`"}.`, colorPalette.success ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜Could not move the requested track to position ${newIndex + 1}.`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013166313583161351> No se pudo mover la pista solicitada a la posición. ${newIndex + 1}.`, colorPalette.error ) ] })
             }
 
         })
