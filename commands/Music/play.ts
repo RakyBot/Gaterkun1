@@ -12,11 +12,11 @@ export default class PlayCommand extends RFCommand {
 
     slashInfo = {
         name: 'play',
-        description: "Play a track.",
+        description: "🎧 Reproducir canciones.",
         options: [
             {
                 name: "query",
-                description: "Search Query (YouTube, Spotify).",
+                description: "Consulta de busqueda (YouTube Music).",
                 type: ApplicationCommandOptionType.String,
                 required: true
             },
@@ -37,14 +37,14 @@ export default class PlayCommand extends RFCommand {
                 adapterCreator: author.voice.channel.guild.voiceAdapterCreator
             })
 
-            if (clientMember.voice.channelId && (clientMember.voice.channelId != author.voice.channelId)) return interaction.editReply(`Please disconnect me from the voice channel I am currently in, or join that voice channel to queue a track.`)
+            if (clientMember.voice.channelId && (clientMember.voice.channelId != author.voice.channelId)) return interaction.editReply(`Desconécteme del canal de voz en el que estoy actualmente o únase a ese canal de voz para poner en cola una pista.`)
             
             const result = await new Queue(interaction.client, queueMap).add(guild.id, query)
 
             if (result) {
                 return interaction.editReply({ embeds: [ basicEmbed( result, colorPalette.trackOperation ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜Error queueing track(s).`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013166313583161351> Error al poner en cola las pistas.`, colorPalette.error ) ] })
             }
             
 
