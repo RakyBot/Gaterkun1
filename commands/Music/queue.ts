@@ -12,7 +12,7 @@ export default class QueueCommand extends RFCommand {
 
     slashInfo = {
         name: 'queue',
-        description: "See the current queue",
+        description: "💎 Ver las canciones actual puestas",
     }
 
     async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
@@ -23,33 +23,33 @@ export default class QueueCommand extends RFCommand {
             const queue = new Queue(interaction.client, queueMap)
             const guildQueue = queue.queueMap.get(guild.id)
             const result = queue.constructEmbed(guild.id)
-                if (!result || !guildQueue) return await interaction.editReply({ embeds: [ basicEmbed( `🛑｜An error occurred getting the queue.`, colorPalette.error ) ] }).catch((err) => { throw err; });
+                if (!result || !guildQueue) return await interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013162318764449883> Ocurrió un error al obtener la lista de musica.`, colorPalette.error ) ] }).catch((err) => { throw err; });
             
             let queueStatus: string
             if (guildQueue.settings.trackLoop) {
-                queueStatus = "🔂｜Looping the current track."
+                queueStatus = "<:xdda:1013165735431901276> Bucle de la pista actual."
             } else if (guildQueue.settings.queueLoop) {
-                queueStatus = "🔁｜Looping the queue."
+                queueStatus = "<:xdda:1013165735431901276> Reproduciendo las canciones."
             } else if (guildQueue.settings.shuffle) {
-                queueStatus = "🔀｜Shuffling the queue."
+                queueStatus = "<:xdda:1013165735431901276> Reproduciendo las canciones..."
             }else {
-                queueStatus = "🟦｜Not looping."
+                queueStatus = "<:xdda:1013165202944032859> Sin bucles."
             }
 
             if (guildQueue.player.state.status === AudioPlayerStatus.Paused) {
-                queueStatus = queueStatus.concat(`\n⏸️｜The queue is currently paused.`)
+                queueStatus = queueStatus.concat(`\n <:xdda:1013162815109992448> Las canciones está actualmente en pausa.`)
             }
 
             let timeRemaining: string = "`No track is currently playing.`"
             if (guildQueue.player.state.status === AudioPlayerStatus.Playing) {
                 function fmtMSS(s: number){return(s-(s%=60))/60+(9<s?':':':0')+s} // Seconds -> M:SS (Minutes: Seconds)
                 const currentTrack = guildQueue.queue[guildQueue.currentTrack]
-                timeRemaining = currentTrack ? `${"`"}${fmtMSS(Math.floor(guildQueue.currentResource.resource.playbackDuration / 1000) + guildQueue.currentResource.savedPassedTime)}${"`"}/${"`"}${fmtMSS(Number(currentTrack.duration))}${"`"}` : "`No track is currently playing.`"
+                timeRemaining = currentTrack ? `${"`"}${fmtMSS(Math.floor(guildQueue.currentResource.resource.playbackDuration / 1000) + guildQueue.currentResource.savedPassedTime)}${"`"}/${"`"}${fmtMSS(Number(currentTrack.duration))}${"`"}` : "`No se está reproduciendo ninguna pista actualmente.`"
             }
 
             const queueEmbed = {
                 color: colorPalette.default,
-                title: "Track Queue",
+                title: "Cola de seguimiento",
                 description: `Channel: <#${botMember.voice.channelId}>\n${queueStatus}\n${timeRemaining}`,
                 fields: result.trackArray[result.currentPage - 1],
                 footer: {
