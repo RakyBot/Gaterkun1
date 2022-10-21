@@ -16,7 +16,7 @@ const client = new Client({ intents: [GatewayIntentBits.GuildVoiceStates, Gatewa
 
 client.on('ready', async () => {
     
-    console.log(`Logged in as ${client.user.username}!`);
+    console.log(`Iniciado sesion en ${client.user.username}!`);
 
     const queueMap: Map<Snowflake, QueueEntry> = new Map()
 
