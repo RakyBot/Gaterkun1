@@ -11,7 +11,7 @@ export default class MoveCommand extends RFCommand {
 
     slashInfo = {
         name: 'pause',
-        description: "Pause the music bot.",
+        description: "🔌 Pausa el bot de música.",
     }
 
     async callback(interaction: ChatInputCommandInteraction, config: config, queueMap: queueMapType) {
@@ -20,9 +20,9 @@ export default class MoveCommand extends RFCommand {
             const guild = interaction.guild
             const result = await new Queue(interaction.client, queueMap).pause(guild.id)
             if (result) {
-                return interaction.editReply({ embeds: [ basicEmbed( `⏸️｜Paused the track.`, colorPalette.trackOperation ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013162815109992448> Hizo una pausa en la pista.`, colorPalette.trackOperation ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜Could not pause the track.`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013162318764449883> No se pudo pausar la pista.`, colorPalette.error ) ] })
             }
 
         })
