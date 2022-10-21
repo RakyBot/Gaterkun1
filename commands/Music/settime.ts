@@ -11,11 +11,11 @@ export default class SetTimeCommand extends RFCommand {
 
     slashInfo = {
         name: 'settime',
-        description: "Sets the track to a specific time.",
+        description: "😺 Establece la cancion a un tiempo específico.",
         options: [
             {
                 name: "time",
-                description: "The amount of time (seconds) to set the currently playing track to.",
+                description: "⌛ La cantidad de tiempo (segundos) para configurar la pista que se está reproduciendo actualmente.",
                 type: ApplicationCommandOptionType.Integer,
                 required: true
             },
@@ -34,9 +34,9 @@ export default class SetTimeCommand extends RFCommand {
             const result = await new Queue(interaction.client, queueMap).loadTrack(guild.id, guildQueue.currentTrack, time)
 
             if (result) {
-                return interaction.editReply({ embeds: [ basicEmbed( `🔄｜Set the time to ${time} seconds.`, colorPalette.trackOperation ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013165202944032859> Establezca el tiempo para ${time} segundos.`, colorPalette.trackOperation ) ] })
             } else {
-                return interaction.editReply({ embeds: [ basicEmbed( `🛑｜ Could not go to that time.`, colorPalette.error ) ] })
+                return interaction.editReply({ embeds: [ basicEmbed( `<:xdda:1013162318764449883> No se pudo ir a ese minuto.`, colorPalette.error ) ] })
             }
 
         })
